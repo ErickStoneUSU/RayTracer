@@ -45,6 +45,13 @@ struct Point {
 		b.z = a.z + z;
 		return b;
 	}
+	inline Point operator+(const float& a) {
+		Point b;
+		b.x = a + x;
+		b.y = a + y;
+		b.z = a + z;
+		return b;
+	}
 	inline Point operator*(const float& a) {
 		Point b;
 		b.x = x * a;
@@ -326,23 +333,23 @@ Color getColor(int r, int g, int b) {
 
 Scene getScene() {
 	Scene s;
-	s.cam.point = getPoint(50, 50, 0);
+	s.cam.point = getPoint(0, 0, 0);
 
 	Triangle t;
-	t.p1 = getPoint(10,10,1);
-	t.p2 = getPoint(90, 90, 1);
-	t.p3 = getPoint(90, 10, 1);
+	t.p1 = getPoint(10,10, 10);
+	t.p2 = getPoint(90, 90, 10);
+	t.p3 = getPoint(90, 10, 12);
 	s.triangleList.push_back(t);
 
-	t.p1 = getPoint(10, 10, 1);
-	t.p2 = getPoint(90, 90, 1);
-	t.p3 = getPoint(10, 90, 1);
+	t.p1 = getPoint(10, 10, 10);
+	t.p2 = getPoint(90, 90, 12);
+	t.p3 = getPoint(10, 90, 10);
 	s.triangleList.push_back(t);
 
 	Film film;
-	film.xDim = 500;
-	film.yDim = 500;
-	film.point = getPoint(0, 0, 1);
+	film.xDim = XDIM;
+	film.yDim = YDIM;
+	film.point = getPoint(0, 0, 5);
 	s.fil = film;
 
 	Light light;
@@ -382,29 +389,35 @@ void writeImage(vector<Color>& colorList) {
 void mainLoop() {
 	Scene s = getScene();
 	vector<Color> image;
+	vector<float> rands;
+	for (int i = 0; i <= 50; ++i) {
+		rands.push_back(0.005 * ((float)rand() / RAND_MAX) + 0.005);
+	}
 	
 	for (int i = 0; i < YDIM; ++i) {
 		for (int j = 0; j < XDIM; ++j) {
-			Point point = getPoint(j, i, 1);
-			float t = 20000;
-			for (int k = 0; k < int(s.circleList.size()); ++k){
-				if (s.triangleList[k].intersect(s.cam.point, point, t)) {
-					Point pi = s.cam.point + point * t;
-					Point L = s.lightList[0].point - pi;
-					Point N = s.circleList[0].norm(pi);
-					//float dt = dot(L,N,s.circleList[0].center, s.circleList[0].radius);
-					float dt = dot(L.norm(), N.norm());
-					if (dt < 0) {
-						dt = dt * -1.0f;
+			for (int z = 0; z < 5; ++z){
+				Point point = getPoint(j, i, 1);
+				for (int k = 0; k < int(s.triangleList.size()); ++k) {
+					float t = 20000;
+					if (s.triangleList[k].intersect(s.cam.point, point, t)) {
+						Point pi = s.cam.point + point * t;
+						Point L = s.lightList[0].point - pi;
+						Point N = s.circleList[0].norm(pi);
+						//float dt = dot(L,N,s.circleList[0].center, s.circleList[0].radius);
+						float dt = dot(L.norm(), N.norm());
+						if (dt < 0) {
+							dt = dt * -1.0f;
+						}
+						Color col = (getColor(0, 0, 255) + getColor(255, 255, 255) * dt);
+
+						//float strength = rayTrace(s, ray, 0);
+						//Color color = strengthToColor(strength);
+						image.push_back(col);
 					}
-					Color col = (getColor(0, 0, 255) + getColor(255, 255, 255) * dt);
-				
-					//float strength = rayTrace(s, ray, 0);
-					//Color color = strengthToColor(strength);
-					image.push_back(col);
-				}
-				else {
-					image.push_back(getColor(0, 0, 0));
+					else {
+						image.push_back(getColor(0, 0, 0));
+					}
 				}
 			}			
 		}
