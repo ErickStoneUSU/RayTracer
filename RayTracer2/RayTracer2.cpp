@@ -9,6 +9,7 @@ Write your code in this editor and press "Run" button to compile and execute it.
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <chrono>
 #include <ctime>
 #include <cmath>
 #include "RayTracer2.h"
@@ -19,6 +20,7 @@ using namespace std;
 const int MAX_VAL = 60000;
 const int XDIM = 100;
 const int YDIM = 100;
+const int ZDIM = 1;
 void testPPM();
 bool testCross();
 
@@ -222,6 +224,8 @@ struct Triangle {
 	Point p1;
 	Point p2;
 	Point p3;
+	Color col;
+	Material mat;
 	
 	// a and b form the edge
 	// p is the point on the triangle
@@ -333,24 +337,20 @@ Color getColor(int r, int g, int b) {
 
 Scene getScene() {
 	Scene s;
-	s.cam.point = getPoint(0, 0, 0);
+	s.cam.point = getPoint(25, 25, 0);
 
 	Triangle t;
-	t.p1 = getPoint(10,10, 10);
-	t.p2 = getPoint(90, 90, 10);
-	t.p3 = getPoint(90, 10, 12);
+	t.p1 = getPoint(10, 10, 50);
+	t.p2 = getPoint(90, 90, 50);
+	t.p3 = getPoint(90, 10, 50);
+	t.col = getColor(255,0,0);
 	s.triangleList.push_back(t);
 
-	t.p1 = getPoint(10, 10, 10);
-	t.p2 = getPoint(90, 90, 12);
-	t.p3 = getPoint(10, 90, 10);
+	t.p1 = getPoint(40, 10, 50);
+	t.p2 = getPoint(90, 90, 50);
+	t.p3 = getPoint(10, 90, 50);
+	t.col = getColor(0, 255, 0);
 	s.triangleList.push_back(t);
-
-	Film film;
-	film.xDim = XDIM;
-	film.yDim = YDIM;
-	film.point = getPoint(0, 0, 5);
-	s.fil = film;
 
 	Light light;
 	light.energy = 1; // eV
@@ -389,37 +389,30 @@ void writeImage(vector<Color>& colorList) {
 void mainLoop() {
 	Scene s = getScene();
 	vector<Color> image;
-	vector<float> rands;
-	for (int i = 0; i <= 50; ++i) {
-		rands.push_back(0.005 * ((float)rand() / RAND_MAX) + 0.005);
-	}
 	
 	for (int i = 0; i < YDIM; ++i) {
 		for (int j = 0; j < XDIM; ++j) {
-			for (int z = 0; z < 5; ++z){
-				Point point = getPoint(j, i, 1);
-				for (int k = 0; k < int(s.triangleList.size()); ++k) {
-					float t = 20000;
-					if (s.triangleList[k].intersect(s.cam.point, point, t)) {
-						Point pi = s.cam.point + point * t;
-						Point L = s.lightList[0].point - pi;
-						Point N = s.circleList[0].norm(pi);
-						//float dt = dot(L,N,s.circleList[0].center, s.circleList[0].radius);
-						float dt = dot(L.norm(), N.norm());
-						if (dt < 0) {
-							dt = dt * -1.0f;
-						}
-						Color col = (getColor(0, 0, 255) + getColor(255, 255, 255) * dt);
-
-						//float strength = rayTrace(s, ray, 0);
-						//Color color = strengthToColor(strength);
-						image.push_back(col);
-					}
-					else {
-						image.push_back(getColor(0, 0, 0));
+			Point point = getPoint(j, i, 25) - s.cam.point;
+			// get closest object
+			float t = 20000;
+			int closestVar = -1;
+			for (int k = 0; k < int(s.triangleList.size()); ++k){
+				float tempt;
+				if (s.triangleList[k].intersect(s.cam.point, point, tempt)) {
+					if (tempt < t) {
+						t = tempt;
+						closestVar = k;
 					}
 				}
-			}			
+			}		
+
+			if (closestVar == -1) {
+				image.push_back(getColor(0, 0, 0));
+			}
+			else {
+				Color col = s.triangleList[closestVar].col;
+				image.push_back(col);
+			}
 		}
 	}
 
