@@ -157,9 +157,11 @@ public:
 		//geo.push_back(new Circle(cir));
 
 
-		//cir.center = Point(6, 0, 75);
-		//geo.push_back(new Circle(cir));
+		cir.center = Point(6, 0, 75);
+		geo.push_back(new Circle(cir));
 
+		cir.specular = 1;
+		cir.transparency = 0;
 		cir.center = Point(0, 0, 75);
 		geo.push_back(new Circle(cir));
 
