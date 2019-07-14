@@ -24,7 +24,7 @@ Point getReflectRay(Point & p, Point & ray, Point & surfaceNormal) {
 // todo
 Point getRefractRay(Point& p, Point& ray, float indRef1, float indRef2, Point& surfaceNormal) {
 	// https://en.wikipedia.org/wiki/Snell%27s_law
-	float cos1 = max(-1,min(1,-ray.dot(surfaceNormal)));
+	float cos1 = -ray.dot(surfaceNormal);
 	float cos2,ratio = 0;
 	int flip = 1;
 
@@ -120,12 +120,12 @@ void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, Geometry
 
 Color getColorLight(Color obj, Color light) {
 	float r, g, b;
-	if (obj.b > light.b) {
+	if (obj.r > light.r) {
 		r = light.r;
 	} else {
 		r = obj.r;
 	}
-	if (obj.b > light.b) {
+	if (obj.g > light.g) {
 		g = light.g;
 	}
 	else {
@@ -144,7 +144,7 @@ Color getColorLight(Color obj, Color light) {
 
 Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) {
 	// only allow a certain level for light bounces
-	if (depth > 4){ return black; }
+	if (depth > 2){ return black; }
 
 	// radiance is the amount of light / the area
 	// the area is the cosine of the angle
@@ -184,7 +184,7 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 			if (castShadowRay(s, nextPoint, lightRay)) {
 				// the amount that is reflected in the direction of the light
 				// lambertian shading
-				diffuse = diffuse + l.color * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
+				diffuse = diffuse + getColorLight(closestObj->color,l.color) * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
 			}
 		}
 
@@ -221,31 +221,31 @@ void mainLoop() {
 	int objNums = s.geo.size();
 	Point cam = s.cam.point;
 	const float offset = -DIM * DIM / 2;
-#pragma omp parallel for
+
 	for (int i = 0; i < DIM; ++i)
 	{
 		for (int j = 0; j < DIM; ++j)
 		{
 			for (int k = 0; k < DIM; ++k)
 			{
-				for (int l = 0; l < DIM; ++l)
-				{
-					// todo consider moving the random to a random point on the found triangle
-					// normalize to be a scale of 0 to 1
-					// the offset positions 0,0 in the middle
-					// the huge z avoids fish eye by having the beam mostly focus forward
-					Point p = (cam - Point(float(j * DIM + l) + offset, float(i * DIM + k) + offset, -1000)).norm();
+				parallel_for(0, DIM, [&](size_t l)
+					{
+						// todo consider moving the random to a random point on the found triangle
+						// normalize to be a scale of 0 to 1
+						// the offset positions 0,0 in the middle
+						// the huge z avoids fish eye by having the beam mostly focus forward
+						Point p = (cam - Point(float(j * DIM + l) + offset, float(i * DIM + k) + offset, -1000)).norm();
 
-					Color color(0,0,0);
-					int r = 0, g = 0, b = 0;
-					for (int m = 0; m < 10; ++m) {
-						color = getColor(s, objNums, cam + vecOfRandomNums[m], p, 0, 1);
-						r += color.r;
-						g += color.g;
-						b += color.b;
-					}
-					cList[k][l] = Color(r * .1,g * .1,b * .1);
-				}
+						Color color(0, 0, 0);
+						int r = 0, g = 0, b = 0;
+						for (int m = 0; m < 10; ++m) {
+							color = getColor(s, objNums, cam + vecOfRandomNums[m], p, 0, 1);
+							r += color.r;
+							g += color.g;
+							b += color.b;
+						}
+						cList[k][l] = Color(r * .1, g * .1, b * .1);
+					});
 			}
 			PPMMaker().writeBlock(cList, i, j);
 		}

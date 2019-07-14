@@ -158,10 +158,11 @@ public:
 
 
 		cir.center = Point(6, 0, 75);
-		geo.push_back(new Circle(cir));
+		//geo.push_back(new Circle(cir));
 
-		cir.specular = 1;
-		cir.transparency = 0;
+		cir.thickness = 1.1;
+		cir.specular = 0;
+		cir.transparency = 1;
 		cir.center = Point(0, 0, 75);
 		geo.push_back(new Circle(cir));
 
@@ -206,7 +207,7 @@ public:
 		// be in the middle of the film
 		cam.point = Point(0, 0, 0);
 		//getForeground();
-		//getBackGround();
+		getBackGround();
 		//getTopBackGround();
 		//getBottomBackGround();
 		//getLeftBackGround();
