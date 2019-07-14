@@ -22,6 +22,16 @@ public:
 			(ab < 0) ? 0 : (ab > 255) ? 255 : ab
 		);
 	}
+	inline Color operator*(const Color& a) {
+		float ar = a.r * r;
+		float ag = a.g * g;
+		float ab = a.b * b;
+		return Color(
+			(ar < 0) ? 0 : (ar > 255) ? 255 : ar,
+			(ag < 0) ? 0 : (ag > 255) ? 255 : ag,
+			(ab < 0) ? 0 : (ab > 255) ? 255 : ab
+		);
+	}
 
 	// https://en.wikipedia.org/wiki/Light for the values
 	Color getColor(float w) {

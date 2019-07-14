@@ -1,16 +1,11 @@
-#include "Settings.cpp"
-#include <vector>
 #include <Windows.h>
 #include <stdio.h>
 #include <ppl.h>
-#include "Scene.cpp"
-#include "PPMMaker.cpp"
-#include "Point.cpp"
-#include "Color.cpp"
 #include <iostream>
 #include <time.h>
-#include <algorithm>
-#include "Shapes_Full_Spheres.cpp"
+#include "Scene.cpp"
+#include "PPMMaker.cpp"
+
 
 using namespace std;
 using namespace concurrency;
@@ -65,104 +60,159 @@ Point getRefractRay(Point& p, Point& ray, float indRef1, float indRef2) {
 // return false if an object hits that ray and is closer
 bool castShadowRay(Scene & s, int & objNums, Point p, Point ray, float dist) {
 	float tempt = 0;
-	for (int m = 0; m < objNums; ++m) {
-		if (s.geo[m].boundingBox.intersect(p, ray, tempt)) {
-			for (int n = 0; n < s.geo[m].t.size(); ++n) {
-				Point contactPoint;
-				if (s.geo[m].t[n].intersect(p, ray, tempt, contactPoint)) {
+	Point contactPoint;
+	for (int i = 0; i < s.geo.size(); ++i) {
+		float tempt = 999999;
+		Point contactPoint;
+
+
+		// do not cast shadow rays at lights
+		// todo figure out how to ignore points if inside a negative sphere
+		if (Circle * c = dynamic_cast<Circle*>(s.geo[i])) {
+			Circle contactObj;
+			if (dynamic_cast<Circle*>(s.geo[i])->boundingBoxIntersect(p, ray, tempt)) {
+				if (dynamic_cast<Circle*>(s.geo[i])->intersect(p, ray, tempt, contactObj, contactPoint)) {
 					if ((contactPoint - p).magnitude() < dist) {
 						return false;
 					}
 				}
 			}
 		}
+		else if (Mesh * c = dynamic_cast<Mesh*>(s.geo[i])) {
+			Triangle contactObj;
+			if (dynamic_cast<Mesh*>(s.geo[i])->boundingBoxIntersect(p, ray, tempt)) {
+				if (dynamic_cast<Mesh*>(s.geo[i])->intersect(p, ray, tempt, contactObj, contactPoint)) {
+					if ((contactPoint - p).magnitude() < dist) {
+						return false;
+					}
+				}
+			}
+		}
+		else if (Triangle * c = dynamic_cast<Triangle*>(s.geo[i])) {
+			Triangle contactObj;
+			if (dynamic_cast<Triangle*>(s.geo[i])->boundingBoxIntersect(p, ray, tempt)) {
+				if (dynamic_cast<Triangle*>(s.geo[i])->intersect(p, ray, tempt, contactObj, contactPoint)) {
+					if ((contactPoint - p).magnitude() < dist) {
+						return false;
+					}
+				}
+			}
+		}
+
 	}
 	return true;
 }
 
-void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, int & closestObj, int & closestTri, Point & nextPoint, float & t) {
+void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, Geometry & closestObj, Point & nextPoint, float & t, bool & found) {
 	// get closest object
-	for (int m = 0; m < objNums; ++m) {
-		float tempt = 999999;
+	
+	for (int i = 0; i < s.geo.size(); ++i){
+		float tempt = 99999999;
 		Point contactPoint;
 
 		// if the bounding box hits, then check the triangles
 		// todo figure out how to ignore points if inside a negative sphere
-		//if (s.geo[m].boundingBox.intersect(p, ray, tempt)) {
-			for (int n = 0; n < s.geo[m].t.size(); ++n) {
-				if (s.geo[m].t[n].intersect(p, ray, tempt, contactPoint)) {
+		if (Circle * c = dynamic_cast<Circle*>(s.geo[i])) {
+			Circle contactObj;
+			if (dynamic_cast<Circle*>(s.geo[i])->boundingBoxIntersect(p, ray, tempt)) {
+				if (dynamic_cast<Circle*>(s.geo[i])->intersect(p, ray, tempt, contactObj, contactPoint)) {
 					if (tempt < t) {
 						t = tempt;
-						closestObj = m;
-						closestTri = n;
+						closestObj = contactObj;
+						found = true;
 						nextPoint = contactPoint;
 					}
 				}
 			}
-		//}
+		} else if (Mesh * c = dynamic_cast<Mesh*>(s.geo[i])) {
+			Triangle contactObj;
+			if (dynamic_cast<Mesh*>(s.geo[i])->boundingBoxIntersect(p, ray, tempt)) {
+				if (dynamic_cast<Mesh*>(s.geo[i])->intersect(p, ray, tempt, contactObj, contactPoint)) {
+					if (tempt < t) {
+						t = tempt;
+						closestObj = contactObj;
+						found = true;
+						nextPoint = contactPoint;
+					}
+				}
+			}
+		} else if (Triangle *c = dynamic_cast<Triangle*>(s.geo[i])) {
+			Triangle contactObj;
+			if (dynamic_cast<Triangle*>(s.geo[i])->boundingBoxIntersect(p, ray, tempt)) {
+				if (dynamic_cast<Triangle*>(s.geo[i])->intersect(p, ray, tempt, contactObj, contactPoint)) {
+					if (tempt < t) {
+						t = tempt;
+						closestObj = contactObj;
+						found = true;
+						nextPoint = contactPoint;
+					}
+				}
+			}
+		}
+		
 	}
 }
 
 
 
-Color getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) {
+Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) {
 	// only allow a certain level for light bounces
 	if (depth > 4){ return black; }
 
 	// radiance is the amount of light / the area
 	// the area is the cosine of the angle
 	
-	float t = 999999;
-	int closestObj = -1;
-	int closestTri = -1;
-	vector<float> radiance;
+	float t = 99999999;
+	Geometry closestObj;
+	bool found = false;
+	
 	Point nextPoint;
-	getClosestObject(s, objNums,p, ray, closestObj, closestTri, nextPoint, t);
+	getClosestObject(s, objNums,p, ray, closestObj, nextPoint, t, found);
 	
 	// if an object is found
-	if (closestObj != -1) {
-		//radiance = Color(100,100,100); // ambience
-		// add diffuse to radiance
-		// add specular to radiance
-		// if the object has any diffuse, get the color from the material itself.
-		if (s.geo[closestObj].transparency > 0) {
-			for (Light l : s.l) {
-				Point ray = l.p - nextPoint;
-				float dist = ray.magnitude();
-				if (castShadowRay(s, objNums, nextPoint, ray, dist)) {
-					for (Geometry g : s.geo) {
-						float distance;
-						// is there a light intersection
-						if (l.intersect(nextPoint, ray, distance)) {
-							// color = color + getAmountOfLight(nextPoint, nextRay)
-							radiance.push_back(l.s.intensity * (1 / (distance)); // today is there better??
-						}
-					}
+	if (found) {	
+		Color specular(0, 0, 0);
+		Circle contactObj;
+		float distance;
+		Point contactPoint;
+		Point reflectRay;
+		Color refraction = getColor(s, objNums, nextPoint, getRefractRay(p, ray, refInd, closestObj.thickness), ++depth, closestObj.thickness);
+		Color reflection = getColor(s, objNums, nextPoint, getReflectRay(p, ray), ++depth, refInd);
+		
+		// get specular component
+		for (Light l : s.l) {
+			// todo get the point on the circle closest to the nextPoint
+			Point lightRay = l.point - nextPoint;
+			float dist = lightRay.magnitude();
+			// todo which is less expensive checking the light intersection or checking the shadow?
+			if (castShadowRay(s, objNums, nextPoint, lightRay, dist)) {
+				// is there a light intersection
+				
+				if (l.intersect(nextPoint, ray, distance, contactObj, contactPoint)) {
+					// the amount that is reflected in the direction of the light
+					float factor = reflectRay.dot(lightRay.norm());
+
+					// light + specular + reflection
+					Color light = l.color * (factor * factor);
+					specular = specular + light + closestObj.color * l.color * (l.intensity / lightRay.dot(lightRay));
 				}
 			}
 		}
 
-		// If object is reflective, get the color from reflection ray
-		if (s.geo[closestObj].reflectivity > 0) {
-			Point reflectRay = getReflectRay(p,ray);
-			radiance = (radiance + getRadiance(s, objNums, nextPoint, reflectRay, ++depth, refInd)) * (s.geo[closestObj].reflectivity);
-		}
-
-		// If the object has any transparency then recurse the refraction ray
-		if (s.geo[closestObj].transparency > 0) {
-			Point refractRay;
-			refractRay = getRefractRay(p, ray, refInd, s.geo[closestObj].m.thickness);
-			radiance = (radiance + getRadiance(s, objNums, nextPoint, refractRay, ++depth, s.geo[closestObj].m.thickness));
-		}
-
-		return (s.geo[closestObj].t[closestTri].col * s.geo[closestObj ].transparency) + radiance;
+		// get reflective component
+		return Color(255, 255, 255);
+		return specular * closestObj.specular * closestObj.opacity + // specular
+			reflection * closestObj.opacity + // reflection
+			closestObj.color * (1 - closestObj.specular) * closestObj.opacity + // diffuse
+			refraction * closestObj.reflectivity * (1 - closestObj.opacity); // refraction
 	}
 	return black;
 }
 
+
 void mainLoop() {
-	vector<float> vecOfRandomNums(50);
-	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 100000.0; }
+	//vector<float> vecOfRandomNums(50);
+	//for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 100000.0; }
 
 	Scene s = Scene();
 	Color c = Color();
@@ -183,8 +233,6 @@ void mainLoop() {
 	start = clock();
 	int objNums = s.geo.size();
 	Point cam = s.cam.point;
-	float max = 1 / (DIM * DIM);
-	float offset = DIM * DIM / 2;
 #pragma omp parallel for
 	for (int i = 0; i < DIM; ++i)
 	{
@@ -195,14 +243,14 @@ void mainLoop() {
 				for (int l = 0; l < DIM; ++l)
 				{
 					// todo consider moving the random to a random point on the found triangle
-					// normalize to ba a scale of 0 to 1
-					Point p = Point(float(j * DIM + l) - offset, float(i * DIM + k) - offset , 5).norm();
+					// normalize to be a scale of 0 to 1
+					Point p = (cam - Point(float(j * DIM + l) , float(i * DIM + k), -999)).norm();
 					//Color color(0,0,0);
 					// sample
 					//for (int m = 0; m < 2; ++m) {
 						//color = color + (getRadiance(s, objNums, cam + vecOfRandomNums[m], p, 0) * .5);
 					//}
-					cList[k][l] = getRadiance(s, objNums, cam, p, 0, 1);
+					cList[k][l] = getColor(s, objNums, cam, p, 0, 1);
 				}
 			}
 			PPMMaker().writeBlock(cList, i, j);

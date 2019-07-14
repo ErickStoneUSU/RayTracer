@@ -42,6 +42,13 @@ public:
 		return sqrt(x * x + y * y + z * z);
 	}
 
+	inline float distance(Point p) {
+		float xm = p.x - x;
+		float ym = p.y - y;
+		float zm = p.z - z;
+		return sqrt(xm*xm+ym*ym+zm*zm);
+	}
+
 	// this both tests the cross product as well as shows the steps for triangle intersection
 	bool testCross() {
 		// 3 points for a triangle

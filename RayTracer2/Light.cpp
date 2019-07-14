@@ -1,32 +1,18 @@
 #pragma once
-#include "Spectrum.cpp"
-#include "Material.cpp"
-#include "Point.cpp"
+#include "Circle.cpp"
 class Light { 
 public: 
 	Light() { ; }
-	Light(Point i, Spectrum j) { p = i; s = j; }
-	// add intensity
-	// color instead of spectrum at least until you get everything else working
-	Point p;
-	Spectrum s;
-	float intensity;
+	Light(Point poi, float inte, Color col) { point = poi; intensity = inte; color = col; }
 	Color color;
+	float intensity;
+	Point point;
 
-	bool intersect(Point& origin, Point& ray, float & distance) {
-		// get the norm
-		// math from https://onlinemschool.com/math/assistance/cartesian_coordinate/p_line/
-		Point rayFromLightToObject = origin - p;
-		Point newVector = rayFromLightToObject.cross(ray);
-
-		// if it is ""reasonably"" close, give it to them
-		// this gives us the distance of the point to the line
-		distance = newVector.magnitude() / ray.magnitude();
-		if (distance < 75) {
-			return true;
-		}
-
-		// if p is outside of any of the edges, there is no intersection
-		return false;
+	bool intersect(Point& o, Point& dir, float & distance, Circle & contactObj, Point & contactPoint) {
+		return Circle(point, 0.01, Color()).intersect(o, dir, distance, contactObj, contactPoint);
 	};
+
+	Point norm(Point& p) {
+		return p;
+	}
 };

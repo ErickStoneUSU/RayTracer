@@ -1,15 +1,23 @@
+#pragma once
 #include <vector>
-#include "Triangle.cpp"
-#include "Circle.cpp"
+#include "Material.cpp"
+#include "Point.cpp"
 
 class Geometry {
 public:
-	vector<Triangle> t;
-	float transparency; // 0 to 1
-	float reflectivity; // 0 to 1
-	Material m;
-	Circle boundingBox;
-
-	void populateCircle() {}
-	void populateTriangle() {}
+	virtual ~Geometry() {}
+	float opacity = 1; // 0 to 1
+	float reflectivity = 1; // 0 to 1
+	float specular = 1; // 0 to 1
+	Color color;
+	float thickness = 1; // 1 is vacuum/air
+	virtual bool boundingBoxIntersect(Point& o, Point& dir, float& t) { 
+		return false; 
+	};
+	virtual Point norm(Point& p) { 
+		return p; 
+	};
+	virtual bool intersect(Point& o, Point& dir, float& t, Geometry& contactObj, Point contactPoint) { 
+		return false; 
+	};
 };
