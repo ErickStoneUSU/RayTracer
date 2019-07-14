@@ -82,7 +82,7 @@ bool castShadowRay(Scene & s, Point & p, Point &ray) {
 	return true;
 }
 
-void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, Geometry & closestObj, float & t, bool & found, Point & surfaceNormal, Point & contactPoint) {
+void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, Geometry * & closestObj, float & t, bool & found, Point & surfaceNormal, Point & contactPoint) {
 	// get closest object
 	vector<Geometry*> boundedList;
 	for (auto g : s.geo) {
@@ -100,7 +100,7 @@ void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, Geometry
 			if (c->intersect(p, ray, tempt, contactObj, contactPoint, surfaceNormal)) {
 				if (tempt < t) {
 					t = tempt;
-					closestObj = contactObj;
+					closestObj = c;
 					found = true;
 				}
 			}
@@ -110,7 +110,7 @@ void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, Geometry
 			if (c->intersect(p, ray, tempt, contactObj, contactPoint, surfaceNormal)) {
 				if (tempt < t) {
 					t = tempt;
-					closestObj = contactObj;
+					closestObj = c;
 					found = true;
 				}
 			}
@@ -150,7 +150,7 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 	// the area is the cosine of the angle
 	
 	float t = FLT_MAX;
-	Geometry closestObj;
+	Geometry* closestObj;
 	bool found = false;
 	Point surfaceNormal;
 	Point nextPoint;
@@ -162,16 +162,16 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 		Color refraction(0, 0, 0);
 		Color diffuse(0, 0, 0);
 
-		if (closestObj.specular > 0.0)
+		if (closestObj->specular > 0.0)
 		{
 			// normalize the direction and add a very tiny amount to prevent object from hitting exactly itself
 			Point reflectRay = getReflectRay(p, ray, surfaceNormal).norm() + 0.0001;
-			specular = getColor(s, objNums, nextPoint, reflectRay, ++depth, refInd) * closestObj.specular;
+			specular = getColor(s, objNums, nextPoint, reflectRay, ++depth, refInd) * closestObj->specular;
 		}
-		if (closestObj.transparency > 0.0)
+		if (closestObj->transparency > 0.0)
 		{
-			Point refractRay = getRefractRay(p, ray, refInd, closestObj.thickness, surfaceNormal).norm() + 0.0001;
-			refraction = getColor(s, objNums, nextPoint, refractRay, ++depth, closestObj.thickness) * closestObj.transparency;
+			Point refractRay = getRefractRay(p, ray, refInd, closestObj->thickness, surfaceNormal).norm() + 0.0001;
+			refraction = getColor(s, objNums, nextPoint, refractRay, ++depth, closestObj->thickness) * closestObj->transparency;
 		}
 		
 		// get diffuse component
@@ -184,7 +184,7 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 			if (castShadowRay(s, nextPoint, lightRay)) {
 				// the amount that is reflected in the direction of the light
 				// lambertian shading
-				diffuse = diffuse + l.color * (max(surfaceNormal.dot(lightRay), 0)) * (1 - (closestObj.specular + closestObj.transparency));
+				diffuse = diffuse + l.color * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
 			}
 		}
 

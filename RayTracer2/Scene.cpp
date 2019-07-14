@@ -204,7 +204,7 @@ public:
 		// be in the middle of the film
 		cam.point = Point(0, 0, 0);
 		//getForeground();
-		getBackGround();
+		//getBackGround();
 		//getTopBackGround();
 		//getBottomBackGround();
 		//getLeftBackGround();
