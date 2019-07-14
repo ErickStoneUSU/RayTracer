@@ -24,7 +24,7 @@ Point getReflectRay(Point & p, Point & ray, Point & surfaceNormal) {
 // todo
 Point getRefractRay(Point& p, Point& ray, float indRef1, float indRef2, Point& surfaceNormal) {
 	// https://en.wikipedia.org/wiki/Snell%27s_law
-	float cos1 = -surfaceNormal.dot(ray);
+	float cos1 = max(-1,min(1,-ray.dot(surfaceNormal)));
 	float cos2,ratio = 0;
 	int flip = 1;
 
@@ -35,7 +35,7 @@ Point getRefractRay(Point& p, Point& ray, float indRef1, float indRef2, Point& s
 		// light entering medium
 		ratio = indRef2 / indRef1;
 		surfaceNormal = surfaceNormal * -1;
-		cos1 = -cos1;
+		cos1 = cos1 * -1;
 	}
 	else {
 		// light exiting medium
@@ -118,11 +118,33 @@ void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, Geometry
 	}
 }
 
+Color getColorLight(Color obj, Color light) {
+	float r, g, b;
+	if (obj.b > light.b) {
+		r = light.r;
+	} else {
+		r = obj.r;
+	}
+	if (obj.b > light.b) {
+		g = light.g;
+	}
+	else {
+		g = obj.g;
+	}
+	if (obj.b > light.b) {
+		b = light.b;
+	}
+	else {
+		b = obj.b;
+	}
+	return Color(r, g, b);
+}
+
 
 
 Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) {
 	// only allow a certain level for light bounces
-	if (depth > 2){ return black; }
+	if (depth > 4){ return black; }
 
 	// radiance is the amount of light / the area
 	// the area is the cosine of the angle
@@ -142,22 +164,27 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 
 		if (closestObj.specular > 0.0)
 		{
-			specular = getColor(s, objNums, nextPoint, getReflectRay(p, ray, surfaceNormal), ++depth, refInd) * closestObj.specular;
+			// normalize the direction and add a very tiny amount to prevent object from hitting exactly itself
+			Point reflectRay = getReflectRay(p, ray, surfaceNormal).norm() + 0.0001;
+			specular = getColor(s, objNums, nextPoint, reflectRay, ++depth, refInd) * closestObj.specular;
 		}
 		if (closestObj.transparency > 0.0)
 		{
-			refraction = getColor(s, objNums, nextPoint, getRefractRay(p, ray, refInd, closestObj.thickness, surfaceNormal), ++depth, closestObj.thickness) * closestObj.transparency;
+			Point refractRay = getRefractRay(p, ray, refInd, closestObj.thickness, surfaceNormal).norm() + 0.0001;
+			refraction = getColor(s, objNums, nextPoint, refractRay, ++depth, closestObj.thickness) * closestObj.transparency;
 		}
 		
 		// get diffuse component
 		for (Light l : s.l) {
 			// todo get the point on the circle closest to the nextPoint
 			Point lightRay = (l.point - nextPoint).norm();
+			float lightDist = (l.point - nextPoint).magnitude();
+
 			// todo which is less expensive checking the light intersection or checking the shadow?
 			if (castShadowRay(s, nextPoint, lightRay)) {
 				// the amount that is reflected in the direction of the light
 				// lambertian shading
-				diffuse = diffuse + l.color * (max(surfaceNormal.dot(lightRay), 0) * (1 - (closestObj.specular + closestObj.transparency)));
+				diffuse = diffuse + l.color * (max(surfaceNormal.dot(lightRay), 0)) * (1 - (closestObj.specular + closestObj.transparency));
 			}
 		}
 
@@ -207,7 +234,7 @@ void mainLoop() {
 					// normalize to be a scale of 0 to 1
 					// the offset positions 0,0 in the middle
 					// the huge z avoids fish eye by having the beam mostly focus forward
-					Point p = (cam - Point(float(j * DIM + l) + offset, float(i * DIM + k) + offset, -800)).norm();
+					Point p = (cam - Point(float(j * DIM + l) + offset, float(i * DIM + k) + offset, -1000)).norm();
 
 					Color color(0,0,0);
 

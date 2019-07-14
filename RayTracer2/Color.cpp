@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 using namespace std;
 class Color { 
 public:
@@ -23,15 +24,8 @@ public:
 		);
 	}
 	// mix the colors
-	inline Color operator*(const Color& a) {
-		float ar = ((a.r / 255) * (r / 255)) * 255;
-		float ag = ((a.g / 255) * (g / 255)) * 255;
-		float ab = ((a.b / 255) * (b / 255)) * 255;
-		return Color(
-			(ar < 0) ? 0 : (ar > 255) ? 255 : ar,
-			(ag < 0) ? 0 : (ag > 255) ? 255 : ag,
-			(ab < 0) ? 0 : (ab > 255) ? 255 : ab
-		);
+	inline Color colmin(const Color& a) {
+		return Color(min(r, a.r), min(g, a.g),	min(b, a.b));
 	}
 
 	// https://en.wikipedia.org/wiki/Light for the values
