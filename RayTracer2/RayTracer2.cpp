@@ -13,8 +13,12 @@ Write your code in this editor and press "Run" button to compile and execute it.
 #include <ctime>
 #include <cmath>
 #include "RayTracer2.h"
+#include <ppl.h>
+#include <Windows.h>
+#include <random>
 
 using namespace std;
+using namespace concurrency;
 
 
 const int MAX_VAL = 60000;
@@ -47,52 +51,52 @@ struct Point {
 		b.z = a.z + z;
 		return b;
 	}
-	inline Point operator+(const float& a) {
-		Point b;
-		b.x = a + x;
-		b.y = a + y;
-		b.z = a + z;
-		return b;
-	}
-	inline Point operator*(const float& a) {
-		Point b;
-		b.x = x * a;
-		b.y = y * a;
-		b.z = z * a;
-		return b;
-	}
-	inline Point operator/(const float& a) {
-		Point b;
-		b.x = x / a;
-		b.y = y / a;
-		b.z = z / a;
-		return b;
-	}
+inline Point operator+(const float& a) {
+	Point b;
+	b.x = a + x;
+	b.y = a + y;
+	b.z = a + z;
+	return b;
+}
+inline Point operator*(const float& a) {
+	Point b;
+	b.x = x * a;
+	b.y = y * a;
+	b.z = z * a;
+	return b;
+}
+inline Point operator/(const float& a) {
+	Point b;
+	b.x = x / a;
+	b.y = y / a;
+	b.z = z / a;
+	return b;
+}
 
-	inline float dot(const Point& a) {
-		return a.x * x + a.y * y + a.z * z;
-	}
+inline float dot(const Point& a) {
+	return a.x * x + a.y * y + a.z * z;
+}
 
-	inline Point norm() {
-		float magnitude = sqrt(x * x + y * y + z * z);
-		Point point;
-		point.x = x / magnitude;
-		point.y = y / magnitude;
-		point.z = z / magnitude;
-		return point;
-	}
+inline Point norm() {
+	float magnitude = sqrt(x * x + y * y + z * z);
+	Point point;
+	point.x = x / magnitude;
+	point.y = y / magnitude;
+	point.z = z / magnitude;
+	return point;
+}
 
-	inline Point cross(const Point& a) {
-		Point point;
-		point.x = x * a.z - z * a.y;
-		point.y = z * a.x - x * a.z;
-		point.z = x * a.y - y * a.x;
-		return point;
-	}
+inline Point cross(const Point& a) {
+	Point point;
+	point.x = x * a.z - z * a.y;
+	point.y = z * a.x - x * a.z;
+	point.z = x * a.y - y * a.x;
+	return point;
+}
 
-	inline float magnitude() {
-		return sqrt(x * x + y * y + z * z);
-	}
+inline float magnitude() {
+	return sqrt(x * x + y * y + z * z);
+}
 };
 
 float dot(const Point& a, const Point& b) {
@@ -138,73 +142,26 @@ public:
 	Material material;
 	Point center;
 	Color color;
-	float radius = 0;
-	float intersect(Point origin, Point film) {
-		// y = mx + b  
-		  // at 0,0 origin b is 0 and m = p2y/p2x
-		// these represent the lines is both planes
-		// ray to film
-		if (film.x == 0) {
-			film.x = 0.1f;
+	float radius;
+
+	vector<Triangle>convertToTriangles() {
+		int density = 10;
+		float pi = 3.1415;
+		vector<Triangle> tris;
+		for (int i = 0; i < density; ++i) {
+			
+			float v = i * (pi / density);
+			for (int j = -density; j < density; ++j) {
+				float phi = j * (pi / density);
+				Triangle t;
+				t.p1 = getPoint(10, 10, 50);
+				t.p2 = getPoint(90, 90, 50);
+				t.p3 = getPoint(90, 10, 50);
+				t.col = getColor(255, 0, 0);
+				s.triangleList.push_back(t);
+
+			}
 		}
-
-		float yx = film.y / film.x;
-		float zx = film.z / film.x;
-
-		// center of circle
-		float yxc = center.y / center.x;
-		float zxc = center.z / center.x;
-
-		// math equation for distance from point on a line
-		// https://www.geeksforgeeks.org/find-points-at-a-given-distance-on-a-line-of-given-slope/
-		float xleft = center.x + radius * sqrt(1 / (1 + yxc * yxc));
-		float yleft = center.y + radius * -1.0f * yxc * sqrt(1 / (1 + yxc * yxc));
-		float zleft = center.z + radius * -1.0f * zxc * sqrt(1 / (1 + zxc * zxc));
-
-		float yxl = yleft / xleft;
-		float zxl = zleft / xleft;
-
-		float xright = center.x - radius * sqrt(1 / (1 + yxc * yxc));
-		float yright = center.y - radius * -1.0f * yxc * sqrt(1 / (1 + yxc * yxc));
-		float zright = center.z - radius * -1.0f * zxc * sqrt(1 / (1 + zxc * zxc));
-
-		float yxr = yright / xright;
-		float zxr = zright / xright;
-
-		// these represent the lines in both planes for the circle
-		// 1. translate circle 0,0
-		// 2. rotate 90 degrees in both directions
-		// 3. tranlate circle back to origin
-		// the two translated points are the upper and lower bounds of the ray hit
-		//cout << yxl << "   " << yx << "   " << yxr << "   " << zxl << "   " << zx << "   " << zxr << "\n";
-		if (yxl <= yx && yx <= yxr && zxl <= zx && zx <= zxr) {
-			// hit so return the distance to the sphere intersect
-			return 1.0f;
-		}
-
-		return MAX_VAL;
-	};
-	bool intersect2(Point origin, Point direction, float& t) {
-		// todo how does this work??
-		Point rayToCircle = origin - center;
-		// the 2 * ??
-		float dotproducts = 2 * rayToCircle.dot(direction);
-		float somevalue = rayToCircle.dot(rayToCircle) - radius * radius; // ?? itself in the same direction??
-		float disc = dotproducts * dotproducts - 4 * somevalue;
-		if (disc < 0) {
-			return false;
-		}
-		else {
-			disc = sqrt(disc);
-			float t0 = -dotproducts - disc;
-			float t1 = -dotproducts + disc;
-			t = (t0 < t1) ? t0 : t1;
-			return true;
-		}
-	}
-
-	Point norm(Point& pi) {
-		return (pi - center) / radius;
 	}
 };
 
@@ -346,7 +303,7 @@ Scene getScene() {
 	t.col = getColor(255,0,0);
 	s.triangleList.push_back(t);
 
-	t.p1 = getPoint(40, 10, 50);
+	t.p1 = getPoint(10, 10, 50);
 	t.p2 = getPoint(90, 90, 50);
 	t.p3 = getPoint(10, 90, 50);
 	t.col = getColor(0, 255, 0);
@@ -354,13 +311,13 @@ Scene getScene() {
 
 	Light light;
 	light.energy = 1; // eV
-	light.point = getPoint(0, 0., 50);
+	light.point = getPoint(110, 110, 25);
 	s.lightList.push_back(light);
 
 	Circle c = Circle();
-	c.center = getPoint(250, 250, 50);
-	c.radius = 20;
-	c.color = getColor(0, 255, 0);
+	c.center = getPoint(200, 200, 55);
+	c.radius = 5;
+	c.color = getColor(200, 200, 200);
 	s.circleList.push_back(c);
 	return s;
 }
@@ -396,6 +353,7 @@ void mainLoop() {
 			// get closest object
 			float t = 20000;
 			int closestVar = -1;
+			bool wasTri = true;
 			for (int k = 0; k < int(s.triangleList.size()); ++k){
 				float tempt;
 				if (s.triangleList[k].intersect(s.cam.point, point, tempt)) {
@@ -409,8 +367,12 @@ void mainLoop() {
 			if (closestVar == -1) {
 				image.push_back(getColor(0, 0, 0));
 			}
-			else {
+			else if (wasTri){
 				Color col = s.triangleList[closestVar].col;
+				image.push_back(col);
+			}
+			else {
+				Color col = s.circleList[closestVar].color;
 				image.push_back(col);
 			}
 		}
@@ -419,8 +381,84 @@ void mainLoop() {
 	writeImage(image);
 }
 
+// returns energy as float
+float rayTrace(Point origin, Point ray, int depth) {
+	if (depth > 3) {
+		return 0;
+	}
+	// cast several rays
+	// get new origin
+	// get new ray
+	// get energy
+	return 1.0;//energy + rayTrace(newOrigin, newRay, ++depth);
+}
 
+void mainLoop2() {
+	const int DIM = 16;
+	typedef vector<float> row;
+	typedef vector<row> square;
+	typedef vector<square> image;
 
+	row v(DIM);
+	square vv(DIM, v);
+	image vvv(DIM, vv);
+
+	Point origin = getPoint(0,0,0);
+	Point ray = getPoint(0, 0, 5) - origin;
+	int depth = 0;
+
+	// this will iterate in parallel across blocks
+	#pragma omp parallel for
+	for (auto square = vvv.begin(); square < vvv.end(); ++square){
+		for (int i = 0; i < DIM; ++i) {
+			for (int j = 0; j < DIM; ++j) {
+				int squareIndex = square - vvv.begin();
+				// ray trace to get energy
+				//square[i+DIM*squareIndex%DIM][j] = rayTrace(origin, ray, depth);
+			}
+		}
+	}
+
+	row colors;
+	for (auto&& v : vvv) {
+		colors.insert(colors.end(), v.begin(), v.end());
+	}
+
+	//writeImage(colors);
+}
+
+void mainLoop3() {
+	const int DIM = 16;
+	float image[DIM][DIM][DIM];
+
+	parallel_for(0, DIM, [&](int k) {
+		for (int j = 0; j < DIM*DIM; j+=DIM)
+		{
+			for (int i = 0; i < DIM*DIM; i+=DIM)
+			{
+				// raytrace
+				image[k][j][i] = 1.0;// raytrace(i + (k % DIM) * DIM);
+			}
+		}
+	});
+
+}
+
+void parallel_matrix_multiply(double** m1, double** m2, double** result, size_t size)
+{
+	parallel_for(size_t(0), size, [&](size_t i)
+		{
+			for (size_t j = 0; j < size; j++)
+			{
+				double temp = 0;
+				for (int k = 0; k < size; k++)
+				{
+					temp += m1[i][k] * m2[k][j];
+				}
+				result[i][j] = temp;
+			}
+		});
+}
 
 int main()
 {
