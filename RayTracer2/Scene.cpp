@@ -30,8 +30,9 @@ public:
 	void getBackGround() {
 		Triangle t1 = Triangle();
 		t1.color = Color(150, 150, 150);
-		t1.specular = 1;
-		t1.transparency = 1 - t1.specular;
+		t1.specular = 0;
+		t1.transparency = 0;
+		t1.diffuse = 1;
 
 		Point p1(-10, -10, 80);
 		Point p2(10, 10, 80);
@@ -112,7 +113,7 @@ public:
 	void getLeftBackGround() {
 		Triangle t1 = Triangle();
 		t1.color = Color(255, 255, 255);
-		t1.transparency = 1;
+		t1.transparency = 0;
 		t1.specular = 0.5;
 
 		Point p1(10, -10, 120);
@@ -152,8 +153,9 @@ public:
 	void getCircle() {
 		Circle cir(Point(-6, 6, 75), 3, Color(100, 100, 100));
 		cir.thickness = 1.1;
-		cir.specular = 1;
-		cir.transparency = 1 - cir.specular;
+		cir.specular = 0.2;
+		cir.transparency = 0.2;
+		cir.diffuse = 0.6;
 		//geo.push_back(new Circle(cir));
 
 
@@ -183,13 +185,13 @@ public:
 		light = Light(Point(8, 0, 90), 0.1, Color(0, 255, 0));
 		//l.push_back(light);
 
-		light = Light(Point(-10, 0, 50), 0.1, Color(255, 0, 0));
+		light = Light(Point(-12, 0, 50), 0.1, Color(255, 0, 0));
 		l.push_back(light);
 		
-		light = Light(Point(-10, 0, 60), 0.1, Color(0, 255, 0));
+		light = Light(Point(-12, 0, 60), 0.1, Color(0, 255, 0));
 		l.push_back(light);
 
-		light = Light(Point(-10, 0, 70), 0.1, Color(0, 0, 255));
+		light = Light(Point(-12, 0, 70), 0.1, Color(0, 0, 255));
 		l.push_back(light);
 
 		//light = Light(Point(0, -8, 85), 800, Color(0, 0, 255));

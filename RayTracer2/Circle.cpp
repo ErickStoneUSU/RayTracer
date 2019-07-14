@@ -19,7 +19,7 @@ public:
 		return ((p - center) * invRadius).norm();
 	}
 
-	bool intersect(Point& o, Point& r, float& t, Circle & contactObj, Point& contactPoint, Point & surfaceNormal) const {
+	bool intersect(Point& o, Point& r, float& t, Geometry & contactObj, Point& contactPoint, Point & surfaceNormal) const {
 		Point oc = o - center;
 
 		const float b = oc.dot(r) * 2;
@@ -53,7 +53,7 @@ public:
 	}
 
 	// minimal rough approx
-	bool boundingBoxIntersect(Point& o, Point& r) {
+	bool boundingBoxIntersect(Point& o, Point& r, vector<Geometry*>& boundedList) {
 		// get p
 		// p = origin + t * ray
 		// px = ox + t*rx
@@ -88,7 +88,8 @@ public:
 		// a - means no solutions
 		// > 0 means 2 solutions which means a hit and a closest part
 		if (inside > 0) {
-				return true;
+			boundedList.push_back(new Circle(*this));
+			return true;
 		}
 
 		return false;
