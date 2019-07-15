@@ -70,7 +70,7 @@ struct PPMMaker {
 		// k is y
 		// l is x
 		ofstream out;
-		out.open(base + "merged.ppm");
+		out.open(base + "amerged.ppm");
 		out << "P3\n" << XDIM << " " << YDIM << "\n" << "255\n";
 		for (int i = 0; i < DIM; ++i) {
 			vector<ifstream *> v;

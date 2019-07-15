@@ -11,7 +11,7 @@ public:
 	float specular = 1; // 0 to 1
 	Color color;
 	float thickness = 1; // 1 is vacuum/air
-	virtual bool boundingBoxIntersect(Point& o, Point& dir, float& t) { 
+	virtual bool boundingBoxIntersect(Point& o, Point& dir) { 
 		return false; 
 	};
 	virtual Point norm(Point& p) { 

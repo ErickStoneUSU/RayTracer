@@ -35,8 +35,8 @@ public:
 	}
 
 	// intersect on a circle is minimal
-	bool boundingBoxIntersect(Point& o, Point& dir, float& distance) {
-		return boundingBox.boundingBoxIntersect(o, dir, distance);
+	bool boundingBoxIntersect(Point& o, Point& dir) {
+		return boundingBox.boundingBoxIntersect(o, dir);
 	};
 
 	bool intersect(Point& o, Point& dir, float& distance, Triangle & contactObj, Point & contactPoint) {

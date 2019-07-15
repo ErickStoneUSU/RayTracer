@@ -74,23 +74,36 @@ public:
 		// x++ -> right
 		// y++ -> down
 		// be in the middle of the film
-		cam.point = Point(0, 0, -1000);
+		cam.point = Point(0, 0, 0);
 		//getForeground();
 		//getBackGround();
 		
-		Circle cir(Point(DIM*DIM / 2, DIM * DIM / 2, 25), 1, Color(255, 255, 255));
+		Circle cir(Point(-9, 0, 100), 4.5, Color(255, 255, 255));
+		cir.specular = 1;
+		cir.reflectivity = 1;
+		cir.opacity = 1;
 		geo.push_back(new Circle(cir));
 
-		Light light = Light(Point(10, 10, 30), 100, Color(255, 0, 0));
+		cir.center = Point(0, 0, 100);
+		cir.specular = 1;
+		cir.reflectivity = 1;
+		cir.opacity = 1;
+		geo.push_back(new Circle(cir));
+
+		cir.center = Point(9, 0, 100);
+		cir.specular = 1;
+		cir.reflectivity = 1;
+		cir.opacity = 1;
+		geo.push_back(new Circle(cir));
+
+		Light light = Light(Point(-30, 0, 85), 1000, Color(255, 0, 0));
 		l.push_back(light);
 		
-		light = Light(Point(0, 0, 30), 100, Color(0, 255, 0));
-		//l.push_back(light);
-		//geo.push_back(new Light(light));
+		light = Light(Point(0, 0, 85), 1000, Color(0, 255, 0));
+		l.push_back(light);
 
-		light = Light(Point(-10, -10, 30), 100, Color(0, 0, 255));
-		//l.push_back(light);
-		//geo.push_back(new Light(light));
+		light = Light(Point(30, 0, 85), 1000, Color(0, 0, 255));
+		l.push_back(light);
 
 		/*Circle c = Circle();
 		c.center = Point(200, 200, 35);

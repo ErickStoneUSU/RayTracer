@@ -36,11 +36,11 @@ public:
 	};
 
 	// todo is this faster than the intersect method?
-	bool boundingBoxIntersect(Point& origin, Point& ray, float& t) {
+	bool boundingBoxIntersect(Point& origin, Point& ray) {
 		// get the centroid
-		float x = (p1.x + p2.x + p3.x) / 3.0;
-		float y = (p1.y + p2.y + p3.y) / 3.0;
-		float z = (p1.z + p2.z + p3.z) / 3.0;
+		float x = (p1.x + p2.x + p3.x) / 3.0f;
+		float y = (p1.y + p2.y + p3.y) / 3.0f;
+		float z = (p1.z + p2.z + p3.z) / 3.0f;
 
 		Point center(x, y, z);
 
@@ -58,7 +58,7 @@ public:
 	};
 
 
-	float intersect(Point& origin, Point& ray, float& t, Triangle g, Point & p) {
+	float intersect(Point& origin, Point& ray, float& t, Triangle & g, Point & p) {
 		// get the norm
 		Point ab = (p1 - p2);
 		Point ac = p1 - p3;

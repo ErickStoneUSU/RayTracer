@@ -10,7 +10,7 @@ public:
 	float y = 0;
 	float z = 0;
 	inline Point operator-(const Point& a) {
-		return Point(a.x - x, a.y - y, a.z - z);
+		return Point(x - a.x, y - a.y, z - a.z);
 	}
 	inline Point operator+(const Point& a) {
 		return Point(a.x + x, a.y + y, a.z + z);
