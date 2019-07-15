@@ -33,27 +33,22 @@ public:
 		}
 
 		// quadratic equation
-		const float t1 = (-b - sqrt(delta)) / 2;
-		const float t2 = (-b + sqrt(delta)) / 2;
+		const float sol1 = (-b - sqrt(delta)) / 2;
+		const float sol2 = (-b + sqrt(delta)) / 2;
 
-		if (t2 < .0001) { 
+		if (sol2 < .001) { 
 			t = FLT_MAX;
 			return false;
 		}
 
-		if (t1 >= .0001) {
-			t = t1;
+		if (sol1 >= .001) {
+			t = sol1;
 		}
 		else {
-			t = t2;
+			t = sol2;
 		}
 		contactPoint = o + r * t;
 		surfaceNormal = (contactPoint - center).norm();
-
-		// this means that you are inside the sphere
-		if (r.dot(surfaceNormal) > 0) {
-			surfaceNormal = surfaceNormal * -1;
-		}
 		return true;
 	}
 

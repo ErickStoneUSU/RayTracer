@@ -29,28 +29,28 @@ public:
 	}
 	void getBackGround() {
 		Triangle t1 = Triangle();
-		t1.color = Color(255,255,255);
-		t1.transparency = 0.5;
-		t1.specular = 0.5;
+		t1.color = Color(150, 150, 150);
+		t1.specular = 1;
+		t1.transparency = 1 - t1.specular;
 
-		Point p1(-10, 10, 100);
-		Point p2(10, 10, 100);
-		Point p3(-10, -10, 100);
+		Point p1(-10, -10, 80);
+		Point p2(10, 10, 80);
+		Point p3(-10, 10, 80);
 
 		t1.p1 = p1;
 		t1.p2 = p2;
 		t1.p3 = p3;
 		geo.push_back(new Triangle(t1));
 
-		t1.p1 = Point(10, -10, 100);
+		t1.p3 = Point(10, -10, 80);
 		geo.push_back(new Triangle(t1));
 
-		t1.p1 = Point(-10, 10, 100);
-		t1.p2 = Point(-10, -10, 100);
-		t1.p3 = Point(10, -10, 100);
+		t1.p1 = Point(-10, 10, 80);
+		t1.p2 = Point( 10, -10, 80);
+		t1.p3 = Point(10, 10, 80);
 		geo.push_back(new Triangle(t1));
 
-		t1.p2 = Point(10, 10, 100);
+		t1.p3 = Point(-10, -10, 80);
 		geo.push_back(new Triangle(t1));
 	}
 	void getTopBackGround() {
@@ -150,24 +150,22 @@ public:
 	}
 
 	void getCircle() {
-		Circle cir(Point(-6, 0, 100), 3, Color(255, 255, 255));
-		cir.specular = 0.5;
-		cir.transparency = 0.5;
+		Circle cir(Point(-6, 6, 75), 3, Color(100, 100, 100));
+		cir.thickness = 1.1;
+		cir.specular = 1;
+		cir.transparency = 1 - cir.specular;
+		//geo.push_back(new Circle(cir));
+
+
+		//cir.center = Point(6, 0, 75);
+		//geo.push_back(new Circle(cir));
+
+		cir.center = Point(0, 0, 75);
 		geo.push_back(new Circle(cir));
 
-
-		cir.center = Point(6, 0, 100);
-		cir.specular = 0.5;
-		cir.transparency = 0.5;
-		geo.push_back(new Circle(cir));
-
-		cir.center = Point(0, 0, 100);
-		cir.specular = 0.5;
-		cir.transparency = 0.5;
-		geo.push_back(new Circle(cir));
-
-		//cir.center = Point(0, -6, 100);
+		//cir.center = Point(0, -6, 70);
 		//cir.specular = 0.5;
+		//cir.radius = 3;
 		//cir.transparency = 0.5;
 		//geo.push_back(new Circle(cir));
 
@@ -179,13 +177,19 @@ public:
 	}
 
 	void getLight() {
-		Light light = Light(Point(-8, 0, 90), 1600, Color(255, 0, 0));
+		Light light = Light(Point(10, 0, 65), 100, Color(0, 255, 0));
+		//l.push_back(light);
+
+		light = Light(Point(8, 0, 90), 0.1, Color(0, 255, 0));
+		//l.push_back(light);
+
+		light = Light(Point(-10, 0, 50), 0.1, Color(255, 0, 0));
+		l.push_back(light);
+		
+		light = Light(Point(-10, 0, 60), 0.1, Color(0, 255, 0));
 		l.push_back(light);
 
-		light = Light(Point(8, 0, 90), 1600, Color(0, 255, 0));
-		l.push_back(light);
-
-		light = Light(Point(0, 0, 90), 1600, Color(0, 0, 255));
+		light = Light(Point(-10, 0, 70), 0.1, Color(0, 0, 255));
 		l.push_back(light);
 
 		//light = Light(Point(0, -8, 85), 800, Color(0, 0, 255));
@@ -201,10 +205,10 @@ public:
 		cam.point = Point(0, 0, 0);
 		//getForeground();
 		getBackGround();
-		getTopBackGround();
-		getBottomBackGround();
-		getLeftBackGround();
-		getRightBackGround();
+		//getTopBackGround();
+		//getBottomBackGround();
+		//getLeftBackGround();
+		//getRightBackGround();
 		getCircle();
 		getLight();
 	}

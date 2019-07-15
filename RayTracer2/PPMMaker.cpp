@@ -6,7 +6,7 @@
 #include "Color.cpp"
 #include "Settings.cpp"
 
-const string base = "C:\\Projects\\RayTracer\\RayTracer\\RayTracer2\\Image\\";
+const string base = "Image\\";
 using namespace std;
 struct PPMMaker {
 	PPMMaker() {};

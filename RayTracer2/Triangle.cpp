@@ -42,9 +42,9 @@ public:
 		Point p;
 		//return intersect(origin, ray, t, tri, p, surfaceNormal);
 		// get the centroid
-		float x = (p1.x + p2.x + p3.x) / 3.0f;
-		float y = (p1.y + p2.y + p3.y) / 3.0f;
-		float z = (p1.z + p2.z + p3.z) / 3.0f;
+		float x = (p1.x + p2.x + p3.x) * 0.333f;
+		float y = (p1.y + p2.y + p3.y) * 0.333f;
+		float z = (p1.z + p2.z + p3.z) * 0.333f;
 
 		Point center(x, y, z);
 
@@ -57,8 +57,7 @@ public:
 		Circle c; 
 		c.center = Point(x, y, z);
 		c.radius = max(max(d1, d2),d3);// distance to furthest point
-		return false;
-		//return c.boundingBoxIntersect(origin, ray, t);
+		return c.boundingBoxIntersect(origin, ray);
 	};
 
 
