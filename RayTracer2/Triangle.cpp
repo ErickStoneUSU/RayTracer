@@ -2,11 +2,9 @@
 #include "Circle.cpp"
 #include <algorithm>
 
-using namespace std;
-
 class Triangle : public Geometry{
 public:
-	Triangle() {};
+	Triangle() { ; }
 	Triangle(Point & a, Point & b, Point & c) { p1 = a; p2 = b; p3 = c; };
 	Triangle(Point& a, Point& b, Point& c, Color d) { p1 = a; p2 = b; p3 = c; color = d; };
 	
@@ -36,10 +34,7 @@ public:
 	};
 
 	// todo is this faster than the intersect method?
-	bool boundingBoxIntersect(Point& origin, Point& ray) {
-		float t;
-		Triangle tri;
-		Point p;
+	bool boundingBoxIntersect(Point& origin, Point& ray, vector<Geometry *>& boundedList) {
 		//return intersect(origin, ray, t, tri, p, surfaceNormal);
 		// get the centroid
 		float x = (p1.x + p2.x + p3.x) * 0.333f;
@@ -57,11 +52,17 @@ public:
 		Circle c; 
 		c.center = Point(x, y, z);
 		c.radius = max(max(d1, d2),d3);// distance to furthest point
-		return c.boundingBoxIntersect(origin, ray);
+		vector<Geometry*> falseList; // we don't want to add the bounding box circle to the intersect list
+		if (c.boundingBoxIntersect(origin, ray, falseList)) {
+			Triangle* t = new Triangle(*this);
+			boundedList.push_back(t);
+			return true;
+		};
+		return false;
 	};
 
 
-	float intersect(Point& origin, Point& ray, float& t, Triangle & g, Point & p, Point & surfaceNormal) {
+	float intersect(Point& origin, Point& ray, float& t, Geometry & g, Point & p, Point & surfaceNormal) {
 		// get the norm
 		Point ab = p2 - p1;
 		Point ac = p3 - p1;
@@ -80,8 +81,8 @@ public:
 		g = (*this);
 
 		Point contactPoint = origin + ray * t;
-		Point u = g.p2 - g.p1;
-		Point v = g.p3 - g.p1;
+		Point u = p2 - p1;
+		Point v = p3 - p1;
 		surfaceNormal = Point(u.y * v.z - u.z * v.y, u.z * v.x - u.x * v.z, u.x * v.y - u.y * v.x);
 
 		// if p is outside of any of the edges, there is no intersection
