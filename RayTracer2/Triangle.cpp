@@ -21,7 +21,7 @@ public:
 		Point ba = b - a;
 		Point pa = p - a;
 		Point c = ba.cross(pa);
-		return n.dot(c) >= 0;
+		return n.dot(c) > 0;
 	};
 
 	vector<float> barycentricCheckEdge(Point& a, Point& b, Point& p, Point& n, float& area) {
@@ -37,6 +37,10 @@ public:
 
 	// todo is this faster than the intersect method?
 	bool boundingBoxIntersect(Point& origin, Point& ray) {
+		float t;
+		Triangle tri;
+		Point p;
+		return intersect(origin, ray, t, tri, p);
 		// get the centroid
 		float x = (p1.x + p2.x + p3.x) / 3.0f;
 		float y = (p1.y + p2.y + p3.y) / 3.0f;
@@ -60,19 +64,19 @@ public:
 
 	float intersect(Point& origin, Point& ray, float& t, Triangle & g, Point & p) {
 		// get the norm
-		Point ab = (p1 - p2);
-		Point ac = p1 - p3;
-		Point n = ac.cross(ab).norm();
+		Point ab = p2 - p1;
+		Point ac = p3 - p1;
+		Point n = ac.cross(ab).norm(); // the normal cross product is the vector coming out from the triangle
 
 		// use the planes normal (triangles norm) to find the point P on the triangle
 		// distance from origin to plane
-		float D = n.dot(p1);
+		float dist = n.dot(p1);
 
 		// find t in a parametric equation to find P
 		// R(t) = (1-t)C+tr
 		// A*a+B*b+C*c / D = t
 		// P = (a*t, b*t, c*t) -- this is the case when the camera is at 0,0,0
-		t = (n.dot(origin) + n.dot(p1)) / n.dot(ray);
+		t = (n.dot(origin) + dist) / n.dot(ray);
 		p = ray * t;
 		g = (*this);
 

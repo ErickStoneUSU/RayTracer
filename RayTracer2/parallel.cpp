@@ -12,7 +12,7 @@ using namespace concurrency;
 void mainLoop();
 bool rayTrace(Triangle t, Point camera, Point ray, float& tempt);
 Color getRadiance(Scene& s, int& objNums, Point p, Point ray, int depth);
-const Color black(0, 0, 0);
+const Color black(125, 0, 125);
 
 Point getReflectRay(Point & p, Point & ray) {
 	// V = p
@@ -207,8 +207,8 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 
 
 void mainLoop() {
-	//vector<float> vecOfRandomNums(50);
-	//for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 100000.0; }
+	vector<float> vecOfRandomNums(1000);
+	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 100000.0; }
 
 	Scene s = Scene();
 	Color c = Color();
@@ -243,12 +243,12 @@ void mainLoop() {
 					// normalize to be a scale of 0 to 1
 					// the offset positions 0,0 in the middle
 					// the huge z avoids fish eye by having the beam mostly focus forward
-					Point p = (cam - Point(float(j * DIM + l) + offset, float(i * DIM + k) + offset, -1000)).norm();
-					//Color color(0,0,0);
+					Point p = (cam - Point(float(j * DIM + l) + offset, float(i * DIM + k) + offset, -800)).norm();
+					Color color(0,0,0);
 					// sample
-					//for (int m = 0; m < 2; ++m) {
-						//color = color + (getRadiance(s, objNums, cam + vecOfRandomNums[m], p, 0) * .5);
-					//}
+					for (int m = 0; m < 1000; ++m) {
+						color = color + (getRadiance(s, objNums, cam + vecOfRandomNums[m], p, 0) * 0.001 );
+					}
 					cList[k][l] = getColor(s, objNums, cam, p, 0, 1);
 				}
 			}

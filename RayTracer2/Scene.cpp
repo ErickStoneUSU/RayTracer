@@ -29,16 +29,107 @@ public:
 	}
 	void getBackGround() {
 		Triangle t1 = Triangle();
-		t1.color = Color(10,10,10);
+		t1.color = Color(255,255,255);
+		t1.opacity = 1;
+		t1.reflectivity = 0.5;
+		t1.specular = 0.5;
 
-		// floor
-		Point p1(-10, 10, 100);
-		Point p2(10, 10, 100);
-		Point p3(0, 10, 100);
+		Point p1(-10, 10, 120);
+		Point p2(10, 10, 120);
+		Point p3(-10, -10, 120);
 
 		t1.p1 = p1;
 		t1.p2 = p2;
 		t1.p3 = p3;
+		geo.push_back(new Triangle(t1));
+
+		t1.p1 = Point(10, -10, 120);
+		geo.push_back(new Triangle(t1));
+
+		t1.p1 = Point(-10, 10, 120);
+		t1.p2 = Point(-10, -10, 120);
+		t1.p3 = Point(10, -10, 120);
+		geo.push_back(new Triangle(t1));
+
+		t1.p2 = Point(10, 10, 120);
+		geo.push_back(new Triangle(t1));
+	}
+	void getTopBackGround() {
+		Triangle t1 = Triangle();
+		t1.color = Color(255, 255, 255);
+		t1.opacity = 1;
+		t1.reflectivity = 1;
+		t1.specular = 1;
+
+		// floor
+		Point p1(-10, 10, 120);
+		Point p2(10, 10, 120);
+		Point p3(40, 40, 115);
+
+		t1.p1 = p1;
+		t1.p2 = p2;
+		t1.p3 = p3;
+		geo.push_back(new Triangle(t1));
+
+		t1.p3 = Point(-40, 40, 115);
+		geo.push_back(new Triangle(t1));
+	}
+	void getBottomBackGround() {
+		Triangle t1 = Triangle();
+		t1.color = Color(255, 255, 255);
+		t1.opacity = 1;
+		t1.reflectivity = 1;
+		t1.specular = 0;
+
+		// floor
+		Point p1(-10, -10, 120);
+		Point p2(10, -10, 120);
+		Point p3(40, -40, 115);
+
+		t1.p1 = p1;
+		t1.p2 = p2;
+		t1.p3 = p3;
+		geo.push_back(new Triangle(t1));
+
+		t1.p3 = Point(-40, -40, 115);
+		geo.push_back(new Triangle(t1));
+	}
+	void getRightBackGround() {
+		Triangle t1 = Triangle();
+		t1.color = Color(255, 255, 255);
+		t1.opacity = 1;
+		t1.reflectivity = 0.5;
+		t1.specular = 0.5;
+
+		Point p1(-10, -10, 120);
+		Point p2(-40, -40, 115);
+		Point p3(-10, 10, 120);
+
+		t1.p1 = p1;
+		t1.p2 = p2;
+		t1.p3 = p3;
+		geo.push_back(new Triangle(t1));
+
+		t1.p2 = Point(-40, 40, 115);
+		geo.push_back(new Triangle(t1));
+	}
+	void getLeftBackGround() {
+		Triangle t1 = Triangle();
+		t1.color = Color(255, 255, 255);
+		t1.opacity = 1;
+		t1.reflectivity = 0.5;
+		t1.specular = 0.5;
+
+		Point p1(10, -10, 120);
+		Point p2(40, -40, 115);
+		Point p3(10, 10, 120);
+
+		t1.p1 = p1;
+		t1.p2 = p2;
+		t1.p3 = p3;
+		geo.push_back(new Triangle(t1));
+
+		t1.p2 = Point(40, 40, 115);
 		geo.push_back(new Triangle(t1));
 	}
 
@@ -64,21 +155,14 @@ public:
 	}
 
 	void getCircle() {
-		Circle c;
-		c.center = Point(0, 0, 25);
-		c.radius = 100;
-		c.color = Color(255, 255, 255);
-		convertToTriangles(c);
-	}
-	void getScene() {
-		// x++ -> right
-		// y++ -> down
-		// be in the middle of the film
-		cam.point = Point(0, 0, 0);
-		//getForeground();
-		//getBackGround();
-		
-		Circle cir(Point(-9, 0, 100), 4.5, Color(255, 255, 255));
+		Circle cir(Point(-6, 0, 100), 3, Color(255, 255, 255));
+		cir.specular = 1;
+		cir.reflectivity = 1;
+		cir.opacity = 1;
+		geo.push_back(new Circle(cir));
+
+
+		cir.center = Point(6, 0, 100);
 		cir.specular = 1;
 		cir.reflectivity = 1;
 		cir.opacity = 1;
@@ -90,29 +174,49 @@ public:
 		cir.opacity = 1;
 		geo.push_back(new Circle(cir));
 
-		cir.center = Point(9, 0, 100);
+		cir.center = Point(0, -6, 100);
 		cir.specular = 1;
 		cir.reflectivity = 1;
 		cir.opacity = 1;
 		geo.push_back(new Circle(cir));
 
-		Light light = Light(Point(-30, 0, 85), 1000, Color(255, 0, 0));
-		l.push_back(light);
-		
-		light = Light(Point(0, 0, 85), 1000, Color(0, 255, 0));
+
+		cir.center = Point(0, 6, 100);
+		cir.specular = 1;
+		cir.reflectivity = 1;
+		cir.opacity = 1;
+		geo.push_back(new Circle(cir));
+	}
+
+	void getLight() {
+		Light light = Light(Point(-8, 0, 85), 800, Color(255, 0, 0));
 		l.push_back(light);
 
-		light = Light(Point(30, 0, 85), 1000, Color(0, 0, 255));
+		light = Light(Point(8, 0, 85), 800, Color(255, 0, 0));
 		l.push_back(light);
 
-		/*Circle c = Circle();
-		c.center = Point(200, 200, 35);
-		c.radius = 5;
-		c.color = Color(200, 200, 200);*/
-		/*vector<Triangle> ct = c.convertToTriangles();
-		for (Triangle it : ct) {
-			geo.push_back(it);
-		}*/
+		light = Light(Point(0, 0, 85), 800, Color(0, 255, 0));
+		l.push_back(light);
+
+		light = Light(Point(0, -8, 85), 800, Color(0, 0, 255));
+		l.push_back(light);
+
+		light = Light(Point(0, 8, 85), 800, Color(0, 0, 255));
+		l.push_back(light);
+	}
+	void getScene() {
+		// x++ -> right
+		// y++ -> down
+		// be in the middle of the film
+		cam.point = Point(0, 0, 0);
+		//getForeground();
+		getBackGround();
+		getTopBackGround();
+		getBottomBackGround();
+		getLeftBackGround();
+		getRightBackGround();
+		getCircle();
+		getLight();
 	}
 	Scene() {
 		getScene();
