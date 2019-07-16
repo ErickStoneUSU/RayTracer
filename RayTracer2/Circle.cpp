@@ -19,7 +19,7 @@ public:
 		return ((p - center) * invRadius).norm();
 	}
 
-	bool intersect(Point& o, Point& r, float& t, Circle & contactObj, Point& contactPoint) const {
+	bool intersect(Point& o, Point& r, float& t, Circle & contactObj, Point& contactPoint, Point & surfaceNormal) const {
 		Point oc = o - center;
 
 		const float b = oc.dot(r) * 2;
@@ -46,6 +46,13 @@ public:
 		}
 		else {
 			t = t2;
+		}
+		contactPoint = o + r * t;
+		surfaceNormal = (contactPoint - center).norm();
+
+		// this means that you are inside the sphere
+		if (r.dot(surfaceNormal) > 0) {
+			surfaceNormal = surfaceNormal * -1;
 		}
 		return true;
 	}

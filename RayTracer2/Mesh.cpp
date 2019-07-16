@@ -39,7 +39,7 @@ public:
 		return boundingBox.boundingBoxIntersect(o, dir);
 	};
 
-	bool intersect(Point& o, Point& dir, float& distance, Triangle & contactObj, Point & contactPoint) {
+	bool intersect(Point& o, Point& dir, float& distance, Triangle & contactObj, Point & contactPoint, Point & surfaceNormal) {
 		// find intersection in list of triangles
 		
 		float dist = 999999;
@@ -48,7 +48,7 @@ public:
 			float temp = 999999;
 			Point tempPoint;
 			
-			if (t.intersect(o, dir, temp, g, tempPoint)) {
+			if (t.intersect(o, dir, temp, g, tempPoint, surfaceNormal)) {
 				if (temp < dist) {
 					dist = temp;
 					contactPoint = tempPoint;

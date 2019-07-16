@@ -40,7 +40,7 @@ public:
 		float t;
 		Triangle tri;
 		Point p;
-		return intersect(origin, ray, t, tri, p);
+		//return intersect(origin, ray, t, tri, p, surfaceNormal);
 		// get the centroid
 		float x = (p1.x + p2.x + p3.x) / 3.0f;
 		float y = (p1.y + p2.y + p3.y) / 3.0f;
@@ -62,7 +62,7 @@ public:
 	};
 
 
-	float intersect(Point& origin, Point& ray, float& t, Triangle & g, Point & p) {
+	float intersect(Point& origin, Point& ray, float& t, Triangle & g, Point & p, Point & surfaceNormal) {
 		// get the norm
 		Point ab = p2 - p1;
 		Point ac = p3 - p1;
@@ -79,6 +79,11 @@ public:
 		t = (n.dot(origin) + dist) / n.dot(ray);
 		p = ray * t;
 		g = (*this);
+
+		Point contactPoint = origin + ray * t;
+		Point u = g.p2 - g.p1;
+		Point v = g.p3 - g.p1;
+		surfaceNormal = Point(u.y * v.z - u.z * v.y, u.z * v.x - u.x * v.z, u.x * v.y - u.y * v.x);
 
 		// if p is outside of any of the edges, there is no intersection
 		return checkEdge(p2, p1, p, n) &&

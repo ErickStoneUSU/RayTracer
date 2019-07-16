@@ -30,35 +30,33 @@ public:
 	void getBackGround() {
 		Triangle t1 = Triangle();
 		t1.color = Color(255,255,255);
-		t1.opacity = 1;
-		t1.reflectivity = 0.5;
+		t1.transparency = 0.5;
 		t1.specular = 0.5;
 
-		Point p1(-10, 10, 120);
-		Point p2(10, 10, 120);
-		Point p3(-10, -10, 120);
+		Point p1(-10, 10, 100);
+		Point p2(10, 10, 100);
+		Point p3(-10, -10, 100);
 
 		t1.p1 = p1;
 		t1.p2 = p2;
 		t1.p3 = p3;
 		geo.push_back(new Triangle(t1));
 
-		t1.p1 = Point(10, -10, 120);
+		t1.p1 = Point(10, -10, 100);
 		geo.push_back(new Triangle(t1));
 
-		t1.p1 = Point(-10, 10, 120);
-		t1.p2 = Point(-10, -10, 120);
-		t1.p3 = Point(10, -10, 120);
+		t1.p1 = Point(-10, 10, 100);
+		t1.p2 = Point(-10, -10, 100);
+		t1.p3 = Point(10, -10, 100);
 		geo.push_back(new Triangle(t1));
 
-		t1.p2 = Point(10, 10, 120);
+		t1.p2 = Point(10, 10, 100);
 		geo.push_back(new Triangle(t1));
 	}
 	void getTopBackGround() {
 		Triangle t1 = Triangle();
 		t1.color = Color(255, 255, 255);
-		t1.opacity = 1;
-		t1.reflectivity = 1;
+		t1.transparency = 1;
 		t1.specular = 1;
 
 		// floor
@@ -77,8 +75,7 @@ public:
 	void getBottomBackGround() {
 		Triangle t1 = Triangle();
 		t1.color = Color(255, 255, 255);
-		t1.opacity = 1;
-		t1.reflectivity = 1;
+		t1.transparency = 1;
 		t1.specular = 0;
 
 		// floor
@@ -97,8 +94,7 @@ public:
 	void getRightBackGround() {
 		Triangle t1 = Triangle();
 		t1.color = Color(255, 255, 255);
-		t1.opacity = 1;
-		t1.reflectivity = 0.5;
+		t1.transparency = 1;
 		t1.specular = 0.5;
 
 		Point p1(-10, -10, 120);
@@ -116,8 +112,7 @@ public:
 	void getLeftBackGround() {
 		Triangle t1 = Triangle();
 		t1.color = Color(255, 255, 255);
-		t1.opacity = 1;
-		t1.reflectivity = 0.5;
+		t1.transparency = 1;
 		t1.specular = 0.5;
 
 		Point p1(10, -10, 120);
@@ -156,53 +151,48 @@ public:
 
 	void getCircle() {
 		Circle cir(Point(-6, 0, 100), 3, Color(255, 255, 255));
-		cir.specular = 1;
-		cir.reflectivity = 1;
-		cir.opacity = 1;
+		cir.specular = 0.5;
+		cir.transparency = 0.5;
 		geo.push_back(new Circle(cir));
 
 
 		cir.center = Point(6, 0, 100);
-		cir.specular = 1;
-		cir.reflectivity = 1;
-		cir.opacity = 1;
+		cir.specular = 0.5;
+		cir.transparency = 0.5;
 		geo.push_back(new Circle(cir));
 
 		cir.center = Point(0, 0, 100);
-		cir.specular = 1;
-		cir.reflectivity = 1;
-		cir.opacity = 1;
+		cir.specular = 0.5;
+		cir.transparency = 0.5;
 		geo.push_back(new Circle(cir));
 
-		cir.center = Point(0, -6, 100);
-		cir.specular = 1;
-		cir.reflectivity = 1;
-		cir.opacity = 1;
-		geo.push_back(new Circle(cir));
+		//cir.center = Point(0, -6, 100);
+		//cir.specular = 0.5;
+		//cir.transparency = 0.5;
+		//geo.push_back(new Circle(cir));
 
 
-		cir.center = Point(0, 6, 100);
-		cir.specular = 1;
-		cir.reflectivity = 1;
-		cir.opacity = 1;
-		geo.push_back(new Circle(cir));
+		//cir.center = Point(0, 6, 100);
+		//cir.specular = 0.5;
+		//cir.transparency = 0.5;
+		//geo.push_back(new Circle(cir));
 	}
 
 	void getLight() {
-		Light light = Light(Point(-8, 0, 85), 800, Color(255, 0, 0));
+		Light light = Light(Point(-8, 0, 90), 1600, Color(255, 0, 0));
 		l.push_back(light);
 
-		light = Light(Point(8, 0, 85), 800, Color(255, 0, 0));
+		light = Light(Point(8, 0, 90), 1600, Color(0, 255, 0));
 		l.push_back(light);
 
-		light = Light(Point(0, 0, 85), 800, Color(0, 255, 0));
+		light = Light(Point(0, 0, 90), 1600, Color(0, 0, 255));
 		l.push_back(light);
 
-		light = Light(Point(0, -8, 85), 800, Color(0, 0, 255));
-		l.push_back(light);
+		//light = Light(Point(0, -8, 85), 800, Color(0, 0, 255));
+		//l.push_back(light);
 
-		light = Light(Point(0, 8, 85), 800, Color(0, 0, 255));
-		l.push_back(light);
+		//light = Light(Point(0, 8, 85), 800, Color(0, 0, 255));
+		//l.push_back(light);
 	}
 	void getScene() {
 		// x++ -> right
