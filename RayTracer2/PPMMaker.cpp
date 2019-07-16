@@ -50,31 +50,29 @@ struct PPMMaker {
 		// j is the block column
 		// k is y
 		// l is x
+		ofstream out;
+		out.open(base + "merged.ppm");
+		out << "P3\n" << XDIM << " " << YDIM << "\n" << "255\n";
 		for (int i = 0; i < DIM; ++i) {
-			vector<ifstream> v;
-			ofstream out;
-			out.open(base + "merged.ppm");
+			vector<ifstream *> v;
+			
 			for (int j = 0; j < DIM; ++j) {
-				ifstream f(base + "body_" + to_string(i) + "_" + to_string(j) + ".ppm");
+				ifstream* f = new ifstream(base + "body_" + to_string(i) + "_" + to_string(j) + ".ppm", ios::in);
 				v.push_back(f);
 			}
 			string line;
-			while (!v[0].eof()) {
+			while (!(*(v[0])).eof()) {
 				for (auto& file : v) {
-					getline(file, line);
-					line.erase(remove(line.begin(), line.end(), '\n'), line.end());
-					out << line;
-					if (v.front != file) {
-						out << "   ";
-					}
+					getline(*file, line);
+					//line.erase(remove(line.begin(), line.end(), '\n'), line.end());
+					out << line << "   ";
 				}
-				if (!v[0].eof()){
-					out << "\n";
-				}
+				out << "\n";
+			}
+			for (auto& file : v) {
+				(*file).close();
 			}
 		}
-		// for each file that has 
-		// pull the first line from each file
-		// pull the second
+		out.close();
 	}
 };

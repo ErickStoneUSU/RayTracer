@@ -8,30 +8,35 @@
 #include "Point.cpp"
 #include "Color.cpp"
 #include <iostream>
+#include <time.h>
 
 using namespace std;
 using namespace concurrency;
+void mainLoop();
+bool rayTrace(Triangle t, Point camera, Point ray, float& tempt);
 
-int main() {
+
+void mainLoop() {
 	Scene s = Scene();
 	Color c = Color();
-	PPMMaker().writeHeader();
 	vector<vector<Color>> cList;
 
 	// allocate the size of the vector
 	vector<Color> temp;
 	for (int j = 0; j < DIM; ++j)
 	{
-		temp.push_back(Color(0,0,0));
+		temp.push_back(Color(0, 0, 0));
 	}
 
 	for (int i = 0; i < DIM; ++i)
 	{
 		cList.push_back(temp);
 	}
-
-
-	//#pragma omp parallel for
+	clock_t start, end;
+	start = clock();
+	const int objNums = s.o.size();
+	const Point cam = s.cam.point;
+//#pragma omp parallel for
 	for (int i = 0; i < DIM; ++i)
 	{
 		for (int j = 0; j < DIM; ++j)
@@ -41,8 +46,9 @@ int main() {
 				for (int l = 0; l < DIM; ++l)
 				{
 					float tempt = 0.0f;
-					for (int m = 0; m < s.o.size(); ++m) {
-						if (rayTrace(s.o[m], s.cam.point, Point(float(j), float(i), 25.0f) - s.cam.point, tempt)) {
+					for (int m = 0; m < objNums; ++m) {
+						//if (rayTrace(s.o[m], cam, Point(float(j), float(i), 25.0f) - cam, tempt)) {
+						if (i % 2 == 0){
 							cList[k][l] = c.getColor(450);
 						}
 						else {
@@ -54,7 +60,11 @@ int main() {
 			PPMMaker().writeBlock(cList, i, j);
 		}
 	}
-	return 0;
+	end = clock();
+	double duration_sec = (double(end) - double (start)) / CLOCKS_PER_SEC;
+
+	cout << duration_sec;
+	return;
 }
 
 bool rayTrace(Triangle t, Point camera, Point ray, float & tempt) {
@@ -65,46 +75,6 @@ bool rayTrace(Triangle t, Point camera, Point ray, float & tempt) {
 		return false;
 	}
 }
-
-//void mainLoop() {
-//	Scene s = Scene();
-//	vector<Color> image;
-//	int xd = 16;
-//	int yd = 16;
-//
-//	for (int i = 0; i < yd; ++i) {
-//		for (int j = 0; j < xd; ++j) {
-//			Point point = Point(j, i, 25) - s.cam.point;
-//			// get closest object
-//			float t = 20000;
-//			int closestVar = -1;
-//			bool wasTri = true;
-//			for (int k = 0; k < int(s.o.size()); ++k) {
-//				float tempt;
-//				if (s.o[k].intersect(s.cam.point, point, tempt)) {
-//					if (tempt < t) {
-//						t = tempt;
-//						closestVar = k;
-//					}
-//				}
-//			}
-//
-//			if (closestVar == -1) {
-//				image.push_back(Color(0, 0, 0));
-//			}
-//			else if (wasTri) {
-//				//Color col = s.o[closestVar].col;
-//				//image.push_back(col);
-//			}
-//			else {
-//				//Color col = s.o[closestVar].color;
-//				//image.push_back(col);
-//			}
-//		}
-//	}
-//
-//	//PPMMaker().writeImage(image);
-//}
 
 // camera point -> (0,0,0) and film point -> (i,j,1)
 // get ray 
@@ -123,3 +93,9 @@ bool rayTrace(Triangle t, Point camera, Point ray, float & tempt) {
 // maybe todo later, seperate the front item detection and  keep a cache of any pixel dominators
 // get ambience
 // store in matrix
+
+int main() {
+	mainLoop();
+	PPMMaker().mergeFile();
+	return 0;
+}
