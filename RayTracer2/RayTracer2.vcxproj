@@ -96,6 +96,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -151,7 +152,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="RayTracer2.cpp" />
+    <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="Light.cpp" />
+    <ClCompile Include="parallel.cpp" />
+    <ClCompile Include="Point.cpp" />
+    <ClCompile Include="PPMMaker.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="Spectrum.cpp" />
+    <ClCompile Include="Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RayTracer2.h" />
