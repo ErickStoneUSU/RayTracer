@@ -184,7 +184,13 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 			if (castShadowRay(s, nextPoint, lightRay)) {
 				// the amount that is reflected in the direction of the light
 				// lambertian shading
-				diffuse = diffuse + getColorLight(closestObj->color,l.color) * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
+				Texture tex = closestObj->texture;
+				if (tex.pattern.size() > 0) {
+					diffuse = diffuse + tex.getColor(nextPoint) * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
+				}
+				else {
+					diffuse = diffuse + l.color * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
+				}
 			}
 		}
 

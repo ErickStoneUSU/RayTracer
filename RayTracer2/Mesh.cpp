@@ -39,11 +39,11 @@ public:
 		return boundingBox.boundingBoxIntersect(o, dir,boundedList);
 	};
 
-	bool intersect(Point& o, Point& dir, float& distance, Triangle & contactObj, Point & contactPoint, Point & surfaceNormal) {
+	bool intersect(Point& o, Point& dir, float& distance, Geometry & contactObj, Point & contactPoint, Point & surfaceNormal) {
 		// find intersection in list of triangles
 		
 		float dist = 999999;
-		Triangle g;
+		Geometry g;
 		for (Triangle t : tris) {
 			float temp = 999999;
 			Point tempPoint;

@@ -29,7 +29,7 @@ public:
 	}
 	void getBackGround() {
 		Triangle t1 = Triangle();
-		t1.color = Color(150, 150, 150);
+		t1.color = Color(255, 0, 0);
 		t1.specular = 0;
 		t1.transparency = 0;
 
@@ -40,18 +40,19 @@ public:
 		t1.p1 = p1;
 		t1.p2 = p2;
 		t1.p3 = p3;
+		t1.texture.setPatternToCheckers();
 		geo.push_back(new Triangle(t1));
 
 		t1.p3 = Point(10, -10, 80);
-		geo.push_back(new Triangle(t1));
+		//geo.push_back(new Triangle(t1));
 
 		t1.p1 = Point(-10, 10, 80);
 		t1.p2 = Point( 10, -10, 80);
 		t1.p3 = Point(10, 10, 80);
-		geo.push_back(new Triangle(t1));
+		//geo.push_back(new Triangle(t1));
 
 		t1.p3 = Point(-10, -10, 80);
-		geo.push_back(new Triangle(t1));
+		//geo.push_back(new Triangle(t1));
 	}
 	void getTopBackGround() {
 		Triangle t1 = Triangle();
@@ -152,18 +153,30 @@ public:
 	void getCircle() {
 		Circle cir(Point(-6., 6, 75), 3, Color(255, 255, 255));
 		cir.thickness = 1;
-		cir.specular = 0;
+		cir.specular = 0.5;
 		cir.transparency = 0;
+		
 		//geo.push_back(new Circle(cir));
 
+		cir.color = Color(255, 255, 255);
+		cir.center = Point(6, 6, 75);
+		geo.push_back(new Circle(cir));
 
-		cir.center = Point(6, 0, 75);
-		//geo.push_back(new Circle(cir));
-
+		cir.texture.setPatternToCheckers();
+		cir.texture.isUV = true;
+		cir.color = Color(255, 255, 255);
 		cir.thickness = 1.1;
 		cir.specular = 0;
-		cir.transparency = 1;
-		cir.center = Point(0, 0, 75);
+		cir.transparency = 0.5;
+		cir.center = Point(3, 0, 75);
+		geo.push_back(new Circle(cir));
+
+		cir.texture.isUV = true;
+		cir.color = Color(255, 255, 255);
+		cir.thickness = 1.7;
+		cir.specular = 0;
+		cir.transparency = 0;
+		cir.center = Point(-9, 6, 75);
 		geo.push_back(new Circle(cir));
 
 		//cir.center = Point(0, -6, 70);
@@ -183,17 +196,17 @@ public:
 		Light light = Light(Point(10, 0, 65), 100, Color(0, 255, 0));
 		//l.push_back(light);
 
-		light = Light(Point(8, 0, 90), 0.1, Color(0, 255, 0));
-		//l.push_back(light);
+		light = Light(Point(8, 0, 60), 0.1, Color(0, 255, 0));
+		l.push_back(light);
 
 		light = Light(Point(8, 0, 60), 0.1, Color(255, 0, 0));
-		l.push_back(light);
+		//l.push_back(light);
 		
 		light = Light(Point(0, 0, 60), 0.1, Color(0, 255, 0));
 		l.push_back(light);
 
 		light = Light(Point(-8, 0, 60), 0.1, Color(0, 0, 255));
-		l.push_back(light);
+		//l.push_back(light);
 
 		//light = Light(Point(0, -8, 85), 800, Color(0, 0, 255));
 		//l.push_back(light);

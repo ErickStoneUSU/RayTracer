@@ -6,11 +6,13 @@
 class Geometry {
 public:
 	virtual ~Geometry() {}
+	Color color;
+	Texture texture;
+	// 0,0 is 1 diffuse
 	float transparency = 0; // 0 to 1
 	float specular = 0; // 0 to 1
-	Color color;
 	float thickness = 1; // 1 is vacuum/air
-	float diffuse = 1;
+
 	virtual bool boundingBoxIntersect(Point& o, Point& dir, vector<Geometry *> boundedList) { 
 		return false; 
 	};
