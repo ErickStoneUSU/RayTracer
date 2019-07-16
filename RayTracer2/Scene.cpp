@@ -15,7 +15,7 @@ public:
 	vector<Light> l;
 	Camera cam;
 	void getScene() {
-		cam.point = Point(25, 25, 0);
+		cam.point = Point(0, 0, 5);
 
 		Triangle t = Triangle();
 		t.p1 = Point(10, 10, 50);

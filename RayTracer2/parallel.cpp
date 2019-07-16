@@ -35,7 +35,8 @@ void mainLoop() {
 	clock_t start, end;
 	start = clock();
 	const int objNums = s.o.size();
-	const Point cam = s.cam.point;
+	Point cam = s.cam.point;
+	const Color black = Color(0, 0, 0);
 //#pragma omp parallel for
 	for (int i = 0; i < DIM; ++i)
 	{
@@ -43,17 +44,25 @@ void mainLoop() {
 		{
 			for (int k = 0; k < DIM; ++k)
 			{
+				float t = 999999;
+				int closestVar = -1;
 				for (int l = 0; l < DIM; ++l)
 				{
-					float tempt = 0.0f;
 					for (int m = 0; m < objNums; ++m) {
-						//if (rayTrace(s.o[m], cam, Point(float(j), float(i), 25.0f) - cam, tempt)) {
-						if (i % 2 == 0){
-							cList[k][l] = c.getColor(450);
+						float tempt = 0;
+						if (rayTrace(s.o[m], cam, Point(float(i*DIM + k), float(j*DIM + l), 0) - cam, tempt)) {
+							if (tempt < t && tempt > 0) {
+								t = tempt;
+								closestVar = m;
+							}
 						}
-						else {
-							cList[k][l] = Color(0, 0, 0);
-						}
+					}
+
+					if (closestVar == -1) {
+						cList[k][l] = black;
+					}
+					else {
+						cList[k][l] = s.o[closestVar].col;
 					}
 				}
 			}
@@ -62,8 +71,7 @@ void mainLoop() {
 	}
 	end = clock();
 	double duration_sec = (double(end) - double (start)) / CLOCKS_PER_SEC;
-
-	cout << duration_sec;
+	std::cout << duration_sec;
 	return;
 }
 
