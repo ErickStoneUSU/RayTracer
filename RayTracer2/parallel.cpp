@@ -172,7 +172,7 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 
 void mainLoop() {
 	vector<float> vecOfRandomNums(1000);
-	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 10000.0; }
+	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 1000.0; }
 
 	Scene s = Scene();
 	Color c = Color();
@@ -210,11 +210,14 @@ void mainLoop() {
 					Point p = (cam - Point(float(j * DIM + l) + offset, float(i * DIM + k) + offset, -800)).norm();
 
 					Color color(0,0,0);
-
+					int r = 0, g = 0, b = 0;
 					for (int m = 0; m < 10; ++m) {
-						color = color + (getColor(s, objNums, cam + vecOfRandomNums[m], p, 0, 1) * 0.1);
+						color = getColor(s, objNums, cam + vecOfRandomNums[m], p, 0, 1);
+						r += color.r;
+						g += color.g;
+						b += color.b;
 					}
-					cList[k][l] = color;
+					cList[k][l] = Color(r * .1,g * .1,b * .1);
 				}
 			}
 			PPMMaker().writeBlock(cList, i, j);
