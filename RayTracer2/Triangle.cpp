@@ -10,10 +10,7 @@ class Triangle {
 public:
 	Triangle() {};
 	Triangle(Point & a, Point & b, Point & c) { p1 = a; p2 = b; p3 = c; };
-	Material m;
-	float transparency; // 0 to 100
-	float diffuse; // 0 to 100 -- transparency + diffuse = 100
-	float absorbancy; // 0 to 100
+	
 	Point p1;
 	Point p2;
 	Point p3;
@@ -41,7 +38,7 @@ public:
 	};
 
 
-	float intersect(Point& origin, Point& ray, float& t, Point & p, Point & reflectRay) {
+	float intersect(Point& origin, Point& ray, float& t, Point & p) {
 		// get the norm
 		Point ab = (p1 - p2);
 		Point ac = p1 - p3;
@@ -57,9 +54,6 @@ public:
 		// P = (a*t, b*t, c*t) -- this is the case when the camera is at 0,0,0
 		t = (n.dot(origin) + n.dot(p1)) / n.dot(ray);
 		p = ray * t;
-
-		// equation from https://www.fabrizioduroni.it/2017/08/25/how-to-calculate-reflection-vector.html
-		reflectRay = origin * 2 * origin.dot(ray) - ray;
 
 		// if p is outside of any of the edges, there is no intersection
 		return checkEdge(p2, p1, p, n) &&

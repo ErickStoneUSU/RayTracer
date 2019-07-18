@@ -5,6 +5,6 @@ using namespace std;
 class Spectrum{
 public:
 	Spectrum() { ; }
-	Spectrum(float b) { brightness = b; }
-	float brightness;
+	Spectrum(float b) { color = b; }
+	float color;
 };

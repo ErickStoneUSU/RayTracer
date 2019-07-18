@@ -154,6 +154,7 @@
   <ItemGroup>
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="parallel.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Spectrum.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Triangle.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
