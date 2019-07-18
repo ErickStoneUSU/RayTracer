@@ -1,11 +1,8 @@
 #pragma once
 #include "Point.cpp"
 #include "Color.cpp"
+#include "Material.cpp"
 #include <vector>
-
-struct Texture {};
-struct Surface {}; // Diffuse (plastic), specular (metal), dielectric (glass), retroreflective (cloth) 
-struct Material { Texture t; Surface f; };
 
 struct Mesh {};
 struct Geometry { Mesh m; };
@@ -16,6 +13,7 @@ using namespace std;
 class Triangle {
 public:
 	Triangle() {};
+	Triangle(Point & a, Point & b, Point & c) { p1 = a; p2 = b; p3 = c; };
 	Instance i;
 	Material m;
 	Point p1;
@@ -45,7 +43,7 @@ public:
 	};
 
 
-	float intersect(Point& origin, Point& film, float& t) {
+	float intersect(Point& origin, Point& ray, float& t, Point & p, Point & reflectRay) {
 		// get the norm
 		Point ab = (p1 - p2);
 		Point ac = p1 - p3;
@@ -59,8 +57,11 @@ public:
 		// R(t) = (1-t)C+tr
 		// A*a+B*b+C*c / D = t
 		// P = (a*t, b*t, c*t) -- this is the case when the camera is at 0,0,0
-		t = (n.dot(origin) + n.dot(p1)) / n.dot(film);
-		Point p = film * t;
+		t = (n.dot(origin) + n.dot(p1)) / n.dot(ray);
+		p = ray * t;
+
+		// equation from https://www.fabrizioduroni.it/2017/08/25/how-to-calculate-reflection-vector.html
+		reflectRay = origin * 2 * origin.dot(ray) - ray;
 
 		// if p is outside of any of the edges, there is no intersection
 		return checkEdge(p2, p1, p, n) &&
@@ -68,7 +69,7 @@ public:
 			checkEdge(p1, p3, p, n);
 	};
 
-	bool barycentricIntersect(Point& origin, Point& film, float& u, float& v) {
+	bool barycentricIntersect(Point& origin, Point& film, float& u, float& v, float& D) {
 		// get the norm
 		Point ab = p1 - p2;
 		Point ac = p1 - p3;
@@ -79,7 +80,7 @@ public:
 
 		// use the planes normal (triangles norm) to find the point P on the triangle
 		// distance from origin to plane
-		float D = n.dot(p1);
+		D = n.dot(p1);
 
 		// find t in a parametric equation to find P
 		// R(t) = (1-t)C+tr

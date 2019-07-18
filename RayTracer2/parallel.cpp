@@ -9,14 +9,67 @@
 #include "Color.cpp"
 #include <iostream>
 #include <time.h>
+#include <algorithm>
 
 using namespace std;
 using namespace concurrency;
 void mainLoop();
 bool rayTrace(Triangle t, Point camera, Point ray, float& tempt);
+float getRadiance(Scene& s, int& objNums, Point p, Point ray, int depth);
 
+float getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth) {
+	// only allow a certain level for light bounces
+	if (depth > 4){ return 0; }
+
+	// radiance is the amount of light / the area
+	// the area is the cosine of the angle
+	float t = 999999;
+	int closestVar = -1;
+	float incident_light = 0;
+	float amount_reflected = 0;
+	float radiance = 0;
+	Point nextPoint;
+	Point nextRay;
+	
+	// get closest object
+	for (int m = 0; m < objNums; ++m) {	
+		float tempt = 999999;
+		Point tempPoint;
+		Point tempRay;
+		if (s.o[m].intersect(p, ray, tempt, tempPoint, tempRay)) {
+			if (tempt < t) {
+				t = tempt;
+				closestVar = m;
+				nextPoint = tempPoint;
+				nextRay = tempRay;
+			}
+		}
+	}
+
+	
+	// this is the color of the intersection
+
+	if (closestVar != -1) {
+		radiance = s.o[closestVar].ambient + s.o[closestVar].getEmission();
+		for (Light l : s.l) {
+			if (l.sees(nextPoint)) {
+				// color = color + getAmountOfLight(nextPoint, nextRay)
+				radiance += l.s.brightness;
+			}
+		}
+	}
+
+	// cast reflected ray
+	// if reflected ray intersects obj, take into account its contribution
+	float specular = s.o[closestVar].m.f.color;
+	radiance += (specular * getRadiance(s, objNums, nextPoint, nextRay, ++depth));
+	return 0;
+}
 
 void mainLoop() {
+	vector<float> vecOfRandomNums(DIM);
+	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 100.0; }
+
 	Scene s = Scene();
 	Color c = Color();
 	vector<vector<Color>> cList;
@@ -34,36 +87,27 @@ void mainLoop() {
 	}
 	clock_t start, end;
 	start = clock();
-	const int objNums = s.o.size();
+	int objNums = s.o.size();
 	Point cam = s.cam.point;
 	const Color black = Color(0, 0, 0);
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < DIM; ++i)
 	{
 		for (int j = 0; j < DIM; ++j)
 		{
 			for (int k = 0; k < DIM; ++k)
 			{
-				float t = 999999;
-				int closestVar = -1;
 				for (int l = 0; l < DIM; ++l)
 				{
-					for (int m = 0; m < objNums; ++m) {
-						float tempt = 0;
-						if (rayTrace(s.o[m], cam, Point(float(i*DIM + k), float(j*DIM + l), 0) - cam, tempt)) {
-							if (tempt < t && tempt > 0) {
-								t = tempt;
-								closestVar = m;
-							}
-						}
+					// recurse down bounces to get radiance
+					Point p = Point(float(j * DIM + l), float(i * DIM + k), 25) - cam;
+					int radiance = 0;
+					// sample
+					for (int m = 0; m < 5; ++m) {
+						radiance += getRadiance(s, objNums, cam + vecOfRandomNums[m], p, 0);
 					}
-
-					if (closestVar == -1) {
-						cList[k][l] = black;
-					}
-					else {
-						cList[k][l] = s.o[closestVar].col;
-					}
+					radiance = radiance / 5;
+					cList[k][l] = c.getColor(radiance);
 				}
 			}
 			PPMMaker().writeBlock(cList, i, j);
@@ -73,15 +117,6 @@ void mainLoop() {
 	double duration_sec = (double(end) - double (start)) / CLOCKS_PER_SEC;
 	std::cout << duration_sec;
 	return;
-}
-
-bool rayTrace(Triangle t, Point camera, Point ray, float & tempt) {
-	if (t.intersect(camera, ray, tempt)) {
-		return true;
-	}
-	else {
-		return false;
-	}
 }
 
 // camera point -> (0,0,0) and film point -> (i,j,1)

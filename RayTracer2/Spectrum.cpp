@@ -1,3 +1,10 @@
-#include "Color.cpp"
+#pragma once
 
-struct Spectrum{};
+using namespace std;
+
+class Spectrum{
+public:
+	Spectrum() { ; }
+	Spectrum(float b) { brightness = b; }
+	float brightness;
+};
