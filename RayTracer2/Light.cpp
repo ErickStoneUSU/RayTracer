@@ -8,6 +8,7 @@ public:
 	Light(Point i, Spectrum j) { p = i; s = j; }
 	Point p;
 	Spectrum s;
+
 	bool intersect(Point& origin, Point& ray, float & distance) {
 		// get the norm
 		// math from https://onlinemschool.com/math/assistance/cartesian_coordinate/p_line/

@@ -4,17 +4,12 @@
 #include "Material.cpp"
 #include <vector>
 
-struct Mesh {};
-struct Geometry { Mesh m; };
-struct Instance { Geometry g; };
-
 using namespace std;
 
 class Triangle {
 public:
 	Triangle() {};
 	Triangle(Point & a, Point & b, Point & c) { p1 = a; p2 = b; p3 = c; };
-	Instance i;
 	Material m;
 	Point p1;
 	Point p2;

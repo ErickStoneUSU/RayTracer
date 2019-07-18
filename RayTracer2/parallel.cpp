@@ -46,29 +46,47 @@ float getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth) {
 		}
 	}
 
-	
-	// this is the color of the intersection
+	// determine how much of the ray is should add to 100% as all rays must do one of these three:
+	// 1. reflected
+	// 2. absorbed
+	// 3. refracted
 
+	// if reflected is > 0
+	// get the ray reflected from the next point
+
+	// if refracted is > 0
+	// get the ray refracted from the next point
+
+	
+	// the light that a pixel recieves is:
+	// 1. reduced by color
+	// 2. reduced by absortion 
+	// 3. split by reflection and refraction
+	// 4. consider both paths (perhaps choose one randomly)
+
+	// the Fresnel Equation can tell us how to mix reflection and refraction
+	// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-ray-tracing/adding-reflection-and-refraction
 	if (closestVar != -1) {
-		radiance = s.o[closestVar].ambient + s.o[closestVar].getEmission();
+		//radiance = s.o[closestVar].ambient + s.o[closestVar].getEmission();
 		for (Light l : s.l) {
-			if (l.sees(nextPoint)) {
+			float distance;
+			if (l.intersect(nextPoint, nextRay, distance)) {
 				// color = color + getAmountOfLight(nextPoint, nextRay)
-				radiance += l.s.brightness;
+				radiance += l.s.color / (distance * distance); // today is there better??
 			}
 		}
-	}
 
-	// cast reflected ray
-	// if reflected ray intersects obj, take into account its contribution
-	float specular = s.o[closestVar].m.f.color;
-	radiance += (specular * getRadiance(s, objNums, nextPoint, nextRay, ++depth));
+		// cast reflected ray
+		// if reflected ray intersects obj, take into account its contribution
+		float specular = s.o[closestVar].m.f.color;
+		radiance += (specular * getRadiance(s, objNums, nextPoint, nextRay, ++depth));
+	}
 	return 0;
 }
 
 void mainLoop() {
 	vector<float> vecOfRandomNums(DIM);
-	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 100.0; }
+	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 10000.0; }
 
 	Scene s = Scene();
 	Color c = Color();

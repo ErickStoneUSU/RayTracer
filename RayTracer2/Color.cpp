@@ -23,14 +23,15 @@ public:
 		);
 	}
 
+	// https://en.wikipedia.org/wiki/Light for the values
 	Color getColor(float w) {
-		if (w > 781) { return Color(0, 0, 0); } // outside visible spectrum
-		else if (w > 645) { return Color(255, 0, 0); }
-		else if (w > 580) { return Color(255, wToRGB(w, 645, 580), 0); }
-		else if (w > 510) { return Color(wToRGB(w, 580, 510), 255, 0); }
-		else if (w > 490) { return Color(0, 255, wToRGB(w, 510, 490)); }
-		else if (w > 440) { return Color(0, wToRGB(w, 490, 440), 255); }
-		else if (w > 380) { return Color(wToRGB(w, 440, 380), 0, 255); }
+		if (w > 900) { return Color(0, 0, 0); } // outside visible spectrum
+		else if (w > 620) { return Color(255, 0, 0); }
+		else if (w > 590) { return Color(255, wToRGB(w, 620, 590), 0); }
+		else if (w > 570) { return Color(wToRGB(w, 590, 570), 255, 0); }
+		else if (w > 495) { return Color(0, 255, wToRGB(w, 570, 495)); }
+		else if (w > 450) { return Color(0, wToRGB(w, 495, 450), 255); }
+		else if (w > 380) { return Color(wToRGB(w, 450, 380), 0, 255); }
 		return Color(0, 0, 0); // outside visible spectrum
 	};
 
