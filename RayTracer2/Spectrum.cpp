@@ -6,6 +6,6 @@ using namespace std;
 class Spectrum{
 public:
 	Spectrum() { ; }
-	Spectrum(Color b) { color = b; }
-	Color color;
+	Spectrum(float b) { waveLength = b; }
+	float waveLength;
 };

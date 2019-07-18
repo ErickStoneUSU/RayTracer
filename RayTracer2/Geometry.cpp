@@ -5,8 +5,8 @@
 class Geometry {
 public:
 	vector<Triangle> t;
-	float transparency = 0; // 0 to 1
-	float reflectivity = 0; // 0 to 1
+	float transparency; // 0 to 1
+	float reflectivity; // 0 to 1
 	Material m;
 	Circle boundingBox;
 

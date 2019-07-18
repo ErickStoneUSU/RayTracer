@@ -19,9 +19,11 @@ Color getRadiance(Scene& s, int& objNums, Point p, Point ray, int depth);
 const Color black(0, 0, 0);
 
 Point getReflectRay(Point & p, Point & ray) {
+	// V = p
+	// N = ray
 	// equation from https://www.fabrizioduroni.it/2017/08/25/how-to-calculate-reflection-vector.html
 	float dotted = p.dot(ray);
-	return ray - p * 2 * dotted;
+	return p + ray * (-2 * dotted);
 }
 
 // todo
@@ -118,8 +120,9 @@ Color getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth, float
 	
 	// if an object is found
 	if (closestObj != -1) {
-		Color c = s.geo[closestObj].t[closestTri].col;
-		
+		radiance = Color(100,100,100); // ambience
+		// add diffuse to radiance
+		// add specular to radiance
 		// if the object has any diffuse, get the color from the material itself.
 		if (s.geo[closestObj].transparency < 1) {
 			for (Light l : s.l) {
@@ -131,7 +134,7 @@ Color getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth, float
 						// is there a light intersection
 						if (l.intersect(nextPoint, ray, distance)) {
 							// color = color + getAmountOfLight(nextPoint, nextRay)
-							radiance = radiance + l.s.color * (1 / (distance * distance)); // today is there better??
+							radiance = radiance + radiance.getColor(l.s.waveLength * (1 / (distance))); // today is there better??
 						}
 					}
 				}
@@ -141,17 +144,17 @@ Color getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth, float
 		// If object is reflective, get the color from reflection ray
 		if (s.geo[closestObj].reflectivity > 0) {
 			Point reflectRay = getReflectRay(p,ray);
-			c = c + getRadiance(s, objNums, nextPoint, reflectRay, ++depth, refInd) * s.geo[closestObj].reflectivity * s.geo[closestObj].transparency;
+			radiance = (radiance + getRadiance(s, objNums, nextPoint, reflectRay, ++depth, refInd)) * (s.geo[closestObj].reflectivity);
 		}
 
 		// If the object has any transparency then recurse the refraction ray
 		if (s.geo[closestObj].transparency > 0) {
 			Point refractRay;
 			refractRay = getRefractRay(p, ray, refInd, s.geo[closestObj].m.thickness);
-			c = c + getRadiance(s, objNums, nextPoint, refractRay, ++depth, s.geo[closestObj].m.thickness) * s.geo[closestObj].transparency;
+			radiance = (radiance + getRadiance(s, objNums, nextPoint, refractRay, ++depth, s.geo[closestObj].m.thickness));
 		}
 
-		return c + radiance;
+		return (s.geo[closestObj].t[closestTri].col * s.geo[closestObj ].transparency) + radiance;
 	}
 	return black;
 }
@@ -179,6 +182,7 @@ void mainLoop() {
 	start = clock();
 	int objNums = s.geo.size();
 	Point cam = s.cam.point;
+	float max = 1 / (DIM * DIM);
 #pragma omp parallel for
 	for (int i = 0; i < DIM; ++i)
 	{
@@ -189,7 +193,8 @@ void mainLoop() {
 				for (int l = 0; l < DIM; ++l)
 				{
 					// todo consider moving the random to a random point on the found triangle
-					Point p = Point(float(j * DIM + l), float(i * DIM + k), 25) - cam;
+					// normalize to ba a scale of 0 to 1
+					Point p = Point(float(j * DIM + l), float(i * DIM + k), 5) - cam;
 					Color color(0,0,0);
 					// sample
 					//for (int m = 0; m < 2; ++m) {

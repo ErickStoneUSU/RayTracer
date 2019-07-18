@@ -16,50 +16,61 @@ public:
 	vector<Geometry> geo;
 	vector<Light> l;
 	Camera cam;
-	Geometry getBox() {
+	Geometry getForeground() {
+		Geometry g = Geometry();
+		Triangle t1 = Triangle();
+		g.m.f.color = 250;
+		g.m.thickness = 1.5;
+		g.reflectivity = 0.5;
+		g.transparency = 0.5;
+
+		// bottom
+		t1.p1 = Point(0, 0, 20);
+		t1.p2 = Point(200, 200, 20);
+		t1.p3 = Point(200, 0, 20);
+		t1.col = Color(255, 0, 0);
+		g.t.push_back(t1);
+
+		t1.p3 = Point(0, 200, 20);
+		t1.col = Color(0, 255, 0);
+		g.t.push_back(t1);
+
+		
+		return g;
+	}
+	Geometry getBackGround() {
 		Geometry g = Geometry();
 		Triangle t1 = Triangle();
 		g.m.f.color = 250;
 		g.m.thickness = 1;
-		g.reflectivity = 0;
-		g.transparency = 0;
+		g.reflectivity = 1;
+		g.transparency = 1;
 
-		// bottom
-		t1.p1 = Point(0, 0, 20);
-		t1.p2 = Point(100, 100, 20);
-		t1.p3 = Point(100, 0, 20);
-		t1.col = Color(255, 0, 20);
+		// right
+		t1.p1 = Point(0, 0, 19);
+		t1.p2 = Point(0, 100, 19);
+		t1.p3 = Point(100, 0, 19);
+		t1.col = Color(0, 0, 255);
 		g.t.push_back(t1);
 
-		t1.p3 = Point(0, 100, 20);
-		t1.col = Color(255, 0, 20);
-		g.t.push_back(t1);
+		t1.p1 = Point(200, 0, 10);
+		t1.col = Color(0, 0, 255);
+		//g.t.push_back(t1);
 
-		// left
-		t1.p1 = Point(100, 0, 20);
-		t1.p2 = Point(100, 100, 20);
-		t1.p3 = Point(100, 0, 10);
-		t1.col = Color(255, 255, 0);
-		g.t.push_back(t1);
-
-		t1.p1 = Point(100, 0, 10);
-		t1.col = Color(255, 255, 0);
-		g.t.push_back(t1);
 		return g;
-	}
-	Geometry getForground() {
-		return getBox();
 	}
 	void getScene() {
 		// x++ -> right
 		// y++ -> down
-		cam.point = Point(0, 0, 0);
-		geo.push_back(getForground());
+		// be in the middle of the film
+		cam.point = Point(DIM * DIM / 2.0, DIM * DIM / 2.0, 0);
+		geo.push_back(getForeground());
+		geo.push_back(getBackGround());
 
-		Light light = Light(Point(0, 0, 0), Spectrum(Color(255,255,255)));
+		Light light = Light(Point(DIM * DIM / 2.0, DIM * DIM / 2.0, 0), Spectrum(625)); // red wavelength
 		l.push_back(light);
 
-		light = Light(Point(50, 50, 30), Spectrum(Color(255,255,255)));
+		light = Light(Point(DIM * DIM / 2.0, DIM * DIM / 2.0, 0), Spectrum(497)); // green and blue together
 		l.push_back(light);
 
 		Circle c = Circle();
