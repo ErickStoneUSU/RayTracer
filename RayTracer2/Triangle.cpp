@@ -10,6 +10,7 @@ class Triangle {
 public:
 	Triangle() {};
 	Triangle(Point & a, Point & b, Point & c) { p1 = a; p2 = b; p3 = c; };
+	Triangle(Point& a, Point& b, Point& c, Color d) { p1 = a; p2 = b; p3 = c; col = d; };
 	
 	Point p1;
 	Point p2;
@@ -99,4 +100,15 @@ public:
 		return true;
 
 	};
+
+	void getSubDivide(vector<Triangle> & tl) {
+		Point ab = (p1 + p2) / 2;
+		Point bc = (p2 + p3) / 2;
+		Point ac = (p1 + p3) / 2;
+		
+		tl.push_back(Triangle(p1, ac, ab, Color(0,255,0)));
+		tl.push_back(Triangle(ac, p3, bc, Color(255, 0, 0)));
+		tl.push_back(Triangle(ac, ab, bc, Color(255, 255, 255)));
+		tl.push_back(Triangle(ab, bc, p2, Color(0, 0, 255)));
+	}
 };
