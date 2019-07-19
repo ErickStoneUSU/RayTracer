@@ -6,8 +6,12 @@ class Light {
 public: 
 	Light() { ; }
 	Light(Point i, Spectrum j) { p = i; s = j; }
+	// add intensity
+	// color instead of spectrum at least until you get everything else working
 	Point p;
 	Spectrum s;
+	float intensity;
+	Color color;
 
 	bool intersect(Point& origin, Point& ray, float & distance) {
 		// get the norm

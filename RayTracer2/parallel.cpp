@@ -10,6 +10,7 @@
 #include <iostream>
 #include <time.h>
 #include <algorithm>
+#include "Shapes_Full_Spheres.cpp"
 
 using namespace std;
 using namespace concurrency;
@@ -114,17 +115,17 @@ Color getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth, float
 	float t = 999999;
 	int closestObj = -1;
 	int closestTri = -1;
-	Color radiance = black;
+	vector<float> radiance;
 	Point nextPoint;
 	getClosestObject(s, objNums,p, ray, closestObj, closestTri, nextPoint, t);
 	
 	// if an object is found
 	if (closestObj != -1) {
-		radiance = Color(100,100,100); // ambience
+		//radiance = Color(100,100,100); // ambience
 		// add diffuse to radiance
 		// add specular to radiance
 		// if the object has any diffuse, get the color from the material itself.
-		if (s.geo[closestObj].transparency < 1) {
+		if (s.geo[closestObj].transparency > 0) {
 			for (Light l : s.l) {
 				Point ray = l.p - nextPoint;
 				float dist = ray.magnitude();
@@ -134,7 +135,7 @@ Color getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth, float
 						// is there a light intersection
 						if (l.intersect(nextPoint, ray, distance)) {
 							// color = color + getAmountOfLight(nextPoint, nextRay)
-							radiance = radiance + radiance.getColor(l.s.waveLength * (1 / (distance))); // today is there better??
+							radiance.push_back(l.s.intensity * (1 / (distance)); // today is there better??
 						}
 					}
 				}
@@ -183,6 +184,7 @@ void mainLoop() {
 	int objNums = s.geo.size();
 	Point cam = s.cam.point;
 	float max = 1 / (DIM * DIM);
+	float offset = DIM * DIM / 2;
 #pragma omp parallel for
 	for (int i = 0; i < DIM; ++i)
 	{
@@ -194,8 +196,8 @@ void mainLoop() {
 				{
 					// todo consider moving the random to a random point on the found triangle
 					// normalize to ba a scale of 0 to 1
-					Point p = Point(float(j * DIM + l), float(i * DIM + k), 5) - cam;
-					Color color(0,0,0);
+					Point p = Point(float(j * DIM + l) - offset, float(i * DIM + k) - offset , 5).norm();
+					//Color color(0,0,0);
 					// sample
 					//for (int m = 0; m < 2; ++m) {
 						//color = color + (getRadiance(s, objNums, cam + vecOfRandomNums[m], p, 0) * .5);

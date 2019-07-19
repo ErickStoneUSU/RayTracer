@@ -11,6 +11,11 @@ public:
 	Point center;
 	Color color;
 	float radius;
+	float invRadius;
+
+	Point norm(Point p) {
+		return (center - p) * invRadius;
+	}
 
 	bool intersect(Point & o, Point & r, float & t) {
 		// get p
@@ -55,10 +60,10 @@ public:
 		return false;
 	}
 
-	vector<Triangle>convertToTriangles() {
+	void convertToTriangles(vector<Triangle> & tris) {
 		int density = 10;
 		float pi = 3.1415f;
-		vector<Triangle> tris;
+		
 		for (int i = 0; i < density; ++i) {
 			float v = i * (pi / density);
 			for (int j = -density; j < density; ++j) {
@@ -71,6 +76,5 @@ public:
 				tris.push_back(t);
 			}
 		}
-		return tris;
 	}
 };
