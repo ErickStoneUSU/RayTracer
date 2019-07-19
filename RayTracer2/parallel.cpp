@@ -46,26 +46,23 @@ float getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth) {
 		}
 	}
 
-	// determine how much of the ray is should add to 100% as all rays must do one of these three:
-	// 1. reflected
-	// 2. absorbed
-	// 3. refracted
+	// IMPROVED:
+	// 1. If object has any translucency
+		// 1. get reflection ray
+		// 2. recurse reflected ray
+		// 3. get refraction ray
+		// 4. recurse refraction ray
+		// 5. compute fresnel equation
 
-	// if reflected is > 0
-	// get the ray reflected from the next point
+	// 2. If the object has any diffuse
+		// 1. get absorbancy
+		// 2. for each light
+			// 3. for each object
+				// 4. test if the object is in the way of the light 
+				//    and the closest object to the film (what we hit earlier on)
+				// 5. if not blocked, then add the lights brightness with any reductions for distance, material, and color
+	// 3. return the object color * the summed light brightness
 
-	// if refracted is > 0
-	// get the ray refracted from the next point
-
-	
-	// the light that a pixel recieves is:
-	// 1. reduced by color
-	// 2. reduced by absortion 
-	// 3. split by reflection and refraction
-	// 4. consider both paths (perhaps choose one randomly)
-
-	// the Fresnel Equation can tell us how to mix reflection and refraction
-	// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-ray-tracing/adding-reflection-and-refraction
 	if (closestVar != -1) {
 		//radiance = s.o[closestVar].ambient + s.o[closestVar].getEmission();
 		for (Light l : s.l) {
@@ -137,6 +134,7 @@ void mainLoop() {
 	return;
 }
 
+// old notes
 // camera point -> (0,0,0) and film point -> (i,j,1)
 // get ray 
 // point = fp + cp = (i,j,1)
@@ -154,6 +152,21 @@ void mainLoop() {
 // maybe todo later, seperate the front item detection and  keep a cache of any pixel dominators
 // get ambience
 // store in matrix
+	// determine how much of the ray is should add to 100% as all rays must do one of these three:
+	// 1. reflected
+	// 2. absorbed
+	// 3. refracted
+	// if reflected is > 0
+	// get the ray reflected from the next point
+	// if refracted is > 0
+	// get the ray refracted from the next point
+	// the light that a pixel recieves is:
+	// 1. reduced by color
+	// 2. reduced by absortion 
+	// 3. split by reflection and refraction
+	// 4. consider both paths (perhaps choose one randomly)
+	// the Fresnel Equation can tell us how to mix reflection and refraction
+	// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-ray-tracing/adding-reflection-and-refraction
 
 int main() {
 	mainLoop();

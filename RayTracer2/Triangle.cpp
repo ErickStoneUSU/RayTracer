@@ -11,6 +11,9 @@ public:
 	Triangle() {};
 	Triangle(Point & a, Point & b, Point & c) { p1 = a; p2 = b; p3 = c; };
 	Material m;
+	float transparency; // 0 to 100
+	float diffuse; // 0 to 100 -- transparency + diffuse = 100
+	float absorbancy; // 0 to 100
 	Point p1;
 	Point p2;
 	Point p3;
