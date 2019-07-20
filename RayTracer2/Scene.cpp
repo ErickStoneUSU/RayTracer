@@ -53,7 +53,7 @@ public:
 	void getScene() {
 		// x++ -> right
 		// y++ -> down
-		cam.point = Point(DIM * DIM / 2 + 100, DIM * DIM / 2 + 100, 0);
+		cam.point = Point(0, 0, 0);
 		geo.push_back(getForground());
 
 		Light light = Light(Point(0, 0, 0), Spectrum(Color(255,255,255)));
