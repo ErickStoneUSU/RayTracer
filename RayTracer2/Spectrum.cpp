@@ -1,10 +1,11 @@
 #pragma once
+#include "Color.cpp"
 
 using namespace std;
 
 class Spectrum{
 public:
 	Spectrum() { ; }
-	Spectrum(float b) { color = b; }
-	float color;
+	Spectrum(Color b) { color = b; }
+	Color color;
 };

@@ -2,7 +2,7 @@
 using namespace std;
 class Color { 
 public:
-	Color() {}
+	Color() { r = 0; g = 0; b = 0; }
 	Color(int i, int j, int k) { r = i; g = j; b = k; } 
 	int r, g, b;
 	inline Color operator+(const Color& a) {

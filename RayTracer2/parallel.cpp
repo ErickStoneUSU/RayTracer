@@ -25,11 +25,37 @@ Point getReflectRay(Point & p, Point & ray) {
 }
 
 // todo
-Point getRefractRay(Point& p, Point& ray) {
-	// todo get the refraction ray
-	// http://www.starkeffects.com/snells-law-vector.shtml
-	// todo get an intuitive understanding of this
-	return Point();
+Point getRefractRay(Point& p, Point& ray, float indRef1, float indRef2) {
+	// https://en.wikipedia.org/wiki/Snell%27s_law
+	float dir = p.dot(ray);
+	float cos1 = 0;
+	float ratio = 0;
+	int flip = 1;
+
+	// any angles that are not between 0 and 180 are chopped
+	// ratio is flipped if we are exiting of entering the medium
+	if (dir > 0) {
+		cos1 = min(dir, 1);
+		// light entering medium
+		ratio = indRef2 / indRef1;
+		flip = -1;
+	}
+	else {
+		cos1 = abs(max(dir, -1));
+		// light exiting medium
+		ratio = indRef1 / indRef2;
+	}	
+
+	// cos@2 = sqrt(1 - (n1/n2)^2*(1-cos@1^2))
+	// vref = (n1/n2)*l + (n1/n2*cos@1-cos@2)*n
+	
+	float cos2 = 1 - ratio * ratio * (1 - cos1 * cos1);
+
+	if (cos2 < 0) {
+		return Point(0, 0, 0); // direction vector
+	}
+	
+	return p * ratio + ray * (ratio * cos1 - sqrt(cos2)) * flip;
 }
 
 // cast the next point to the ray pointing to the light
@@ -59,7 +85,7 @@ void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, int & cl
 
 		// if the bounding box hits, then check the triangles
 		// todo figure out how to ignore points if inside a negative sphere
-		if (s.geo[m].boundingBox.intersect(p, ray, tempt)) {
+		//if (s.geo[m].boundingBox.intersect(p, ray, tempt)) {
 			for (int n = 0; n < s.geo[m].t.size(); ++n) {
 				if (s.geo[m].t[n].intersect(p, ray, tempt, contactPoint)) {
 					if (tempt < t) {
@@ -70,69 +96,69 @@ void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, int & cl
 					}
 				}
 			}
-		}
+		//}
 	}
 }
 
-Color getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth) {
+
+
+Color getRadiance(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) {
 	// only allow a certain level for light bounces
 	if (depth > 4){ return black; }
 
 	// radiance is the amount of light / the area
 	// the area is the cosine of the angle
-	Color c(0,0,0);
+	
 	float t = 999999;
 	int closestObj = -1;
 	int closestTri = -1;
-	float radiance = 0;
+	Color radiance = black;
 	Point nextPoint;
 	getClosestObject(s, objNums,p, ray, closestObj, closestTri, nextPoint, t);
-
+	
+	// if an object is found
 	if (closestObj != -1) {
-		c = Color(150,150,150); // use a different color to allow distinctiveness for testing
-
-		// If object has any diffuse then recurse the reflective ray
+		Color c = s.geo[closestObj].t[closestTri].col;
+		
+		// if the object has any diffuse, get the color from the material itself.
 		if (s.geo[closestObj].transparency < 1) {
-			Point reflectRay = getReflectRay(p,ray);
-			c = c + getRadiance(s, objNums, nextPoint, reflectRay, ++depth) * s.geo[closestObj].transparency;
-		}
-
-		// If the object has any transparency then recurse the refraction ray
-		if (s.geo[closestObj].transparency > 0) {
-			//Point refractRay = getRefractRay(p, ray);
-			//c = c + getRadiance(s, objNums, nextPoint, refractRay, ++depth) * ((100 - s.geo[closestObj].transparency) / 100);
-		}
-			
-		// 1. get absorbancy
-		// 2. for each light
-			// 3. for each object
-				// 4. test if the object is in the way of the light 
-				//    and the closest object to the film (what we hit earlier on)
-				// 5. if not blocked, then add the lights brightness with any reductions for distance, material, and color
-		// 3. return the object color * the summed light brightness
-		for (Light l : s.l) {
-			Point ray = l.p - nextPoint;
-			float dist = ray.magnitude();
-			if (castShadowRay(s, objNums, nextPoint, ray, dist)) {
-				for (Geometry g : s.geo) {
-					float distance;
-					// is there a light intersection
-					if (l.intersect(nextPoint, ray, distance)) {
-						// color = color + getAmountOfLight(nextPoint, nextRay)
-						radiance += l.s.color / (distance * distance); // today is there better??
+			for (Light l : s.l) {
+				Point ray = l.p - nextPoint;
+				float dist = ray.magnitude();
+				if (castShadowRay(s, objNums, nextPoint, ray, dist)) {
+					for (Geometry g : s.geo) {
+						float distance;
+						// is there a light intersection
+						if (l.intersect(nextPoint, ray, distance)) {
+							// color = color + getAmountOfLight(nextPoint, nextRay)
+							radiance = radiance + l.s.color * (1 / (distance * distance)); // today is there better??
+						}
 					}
 				}
 			}
 		}
 
-		return s.geo[closestObj].t[closestTri].col * radiance * s.geo[closestObj].reflectivity;
+		// If object is reflective, get the color from reflection ray
+		if (s.geo[closestObj].reflectivity > 0) {
+			Point reflectRay = getReflectRay(p,ray);
+			c = c + getRadiance(s, objNums, nextPoint, reflectRay, ++depth, refInd) * s.geo[closestObj].reflectivity * s.geo[closestObj].transparency;
+		}
+
+		// If the object has any transparency then recurse the refraction ray
+		if (s.geo[closestObj].transparency > 0) {
+			Point refractRay;
+			refractRay = getRefractRay(p, ray, refInd, s.geo[closestObj].m.thickness);
+			c = c + getRadiance(s, objNums, nextPoint, refractRay, ++depth, s.geo[closestObj].m.thickness) * s.geo[closestObj].transparency;
+		}
+
+		return c + radiance;
 	}
 	return black;
 }
 
 void mainLoop() {
-	vector<float> vecOfRandomNums(DIM);
-	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 10000.0; }
+	vector<float> vecOfRandomNums(50);
+	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 100000.0; }
 
 	Scene s = Scene();
 	Color c = Color();
@@ -166,10 +192,10 @@ void mainLoop() {
 					Point p = Point(float(j * DIM + l), float(i * DIM + k), 25) - cam;
 					Color color(0,0,0);
 					// sample
-					for (int m = 0; m < 5; ++m) {
-						color = color + (getRadiance(s, objNums, cam + vecOfRandomNums[m], p, 0) * 0.2f);
-					}
-					cList[k][l] = color;
+					//for (int m = 0; m < 2; ++m) {
+						//color = color + (getRadiance(s, objNums, cam + vecOfRandomNums[m], p, 0) * .5);
+					//}
+					cList[k][l] = getRadiance(s, objNums, cam, p, 0, 1);
 				}
 			}
 			PPMMaker().writeBlock(cList, i, j);

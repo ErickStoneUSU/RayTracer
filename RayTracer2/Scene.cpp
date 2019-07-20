@@ -16,41 +16,50 @@ public:
 	vector<Geometry> geo;
 	vector<Light> l;
 	Camera cam;
-	Geometry getForground() {
+	Geometry getBox() {
 		Geometry g = Geometry();
 		Triangle t1 = Triangle();
 		g.m.f.color = 250;
 		g.m.thickness = 1;
-		g.reflectivity = 1;
+		g.reflectivity = 0;
 		g.transparency = 0;
 
-		t1.p1 = Point(10, 10, 30);
-		t1.p2 = Point(90, 90, 30);
-		t1.p3 = Point(90, 10, 33);
-		t1.col = Color(255, 0, 0);
+		// bottom
+		t1.p1 = Point(0, 0, 20);
+		t1.p2 = Point(100, 100, 20);
+		t1.p3 = Point(100, 0, 20);
+		t1.col = Color(255, 0, 20);
 		g.t.push_back(t1);
 
-		t1.p3 = Point(10, 90, 37);
-		t1.col = Color(0, 0, 255);
+		t1.p3 = Point(0, 100, 20);
+		t1.col = Color(255, 0, 20);
 		g.t.push_back(t1);
 
-		Triangle t2 = Triangle();
-		t2.p1 = Point(90, 90, 35);
-		t2.p2 = Point(100, 100, 35);
-		t2.p3 = Point(90, 10, 37);
-		t2.col = Color(0, 255, 0);
-		g.t.push_back(t2);
+		// left
+		t1.p1 = Point(100, 0, 20);
+		t1.p2 = Point(100, 100, 20);
+		t1.p3 = Point(100, 0, 10);
+		t1.col = Color(255, 255, 0);
+		g.t.push_back(t1);
 
+		t1.p1 = Point(100, 0, 10);
+		t1.col = Color(255, 255, 0);
+		g.t.push_back(t1);
 		return g;
 	}
+	Geometry getForground() {
+		return getBox();
+	}
 	void getScene() {
-		cam.point = Point(DIM * DIM / 2, DIM * DIM / 2, 0);
+		// x++ -> right
+		// y++ -> down
+		cam.point = Point(DIM * DIM / 2 + 100, DIM * DIM / 2 + 100, 0);
 		geo.push_back(getForground());
 
-		Light light = Light(Point(0, 0, 0), Spectrum(450));
+		Light light = Light(Point(0, 0, 0), Spectrum(Color(255,255,255)));
 		l.push_back(light);
 
-		light = Light(Point(50, 50, 30), Spectrum(650));
+		light = Light(Point(50, 50, 30), Spectrum(Color(255,255,255)));
 		l.push_back(light);
 
 		Circle c = Circle();

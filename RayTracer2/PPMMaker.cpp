@@ -35,14 +35,14 @@ struct PPMMaker {
 		file.open(base + "body_" + to_string(startX) + "_" + to_string(startY) +".ppm");
 		for (int i = 0; i < DIM; ++i) {
 			for (int j = 0; j < DIM; ++j) {
-				if (i != 0 && j != 0 && i != DIM && j != DIM) {
-					int r, g, b;
-					// (i, j, cList, r, g, b); // apply smoothing filter -- maybe not needed
-					file << r << "   " << g << "   " << b;
-				}
-				else {
+				//if (i > 0 && j > 0 && i < DIM - 1 && j < DIM - 1) {
+				//	int r, g, b;
+				//	getAveragedValue(i, j, cList, r, g, b); // apply smoothing filter -- maybe not needed
+				//	file << r << "   " << g << "   " << b;
+				//}
+				//else {
 					file << cList[i][j].r << "   " << cList[i][j].g << "   " << cList[i][j].b;
-				}
+				//}
 				if (j != DIM - 1) {
 					file << "     ";
 				}
