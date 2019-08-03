@@ -1,6 +1,8 @@
 #pragma once
 #include "Circle.cpp"
 #include <algorithm>
+#include <tuple>
+using namespace std;
 
 class Triangle : public Geometry{
 public:
@@ -24,6 +26,13 @@ public:
 	bool hasTexture = false;
 	Texture texture;
 
+	void setTriangle(tuple<float, float, float>& a, const tuple<float, float, float>& b, const tuple<float, float, float>& c, Color col) {
+		p1 = Point(get<0>(a), get<1>(a), get<2>(a));
+		p2 = Point(get<0>(b), get<1>(b), get<2>(b));
+		p3 = Point(get<0>(c), get<1>(c), get<2>(c));
+		color = col;
+	}
+
 	void setup(Point& a, Point& b, Point& c) {
 		p1 = a; p2 = b; p3 = c;
 		p12 = p1 - p2;
@@ -36,6 +45,27 @@ public:
 		dist = n.dot(p1);
 
 		Point center((p1.x + p2.x + p3.x) * (1/3), (p1.y + p2.y + p3.y) * (1/3), (p1.z + p2.z + p3.z) * (1/3));
+		float d1 = center.distance(p1);
+		float d2 = center.distance(p2);
+		float d3 = center.distance(p3);
+		float mdist = max(max(d1, d2), d3);
+
+		boundingBox.center = center;
+		boundingBox.radius = mdist;
+	}
+
+	void setup() {
+		p1 = p1 + 0.1;
+		p12 = p1 - p2;
+		p13 = p1 - p3;
+		p21 = p2 - p1;
+		p23 = p2 - p3;
+		p31 = p3 - p1;
+		p32 = p3 - p2;
+		n = (p31).cross(p21).norm();
+		dist = n.dot(p1);
+
+		Point center((p1.x + p2.x + p3.x) * (1 / 3), (p1.y + p2.y + p3.y) * (1 / 3), (p1.z + p2.z + p3.z) * (1 / 3));
 		float d1 = center.distance(p1);
 		float d2 = center.distance(p2);
 		float d3 = center.distance(p3);
@@ -87,5 +117,21 @@ public:
 		tl.push_back(Triangle(ac, p3, bc, Color(255, 0, 0)));
 		tl.push_back(Triangle(ac, ab, bc, Color(255, 255, 255)));
 		tl.push_back(Triangle(ab, bc, p2, Color(0, 0, 255)));
+	}
+
+	inline Triangle operator*(const float& a) {
+		p1 = p1 * a;
+		p2 = p2 * a;
+		p3 = p3 * a;
+		setup();
+		return *this;
+	}
+
+	inline Triangle operator+(const Point& a) {
+		p1 = p1 + a;
+		p2 = p2 + a;
+		p3 = p3 + a;
+		setup();
+		return *this;
 	}
 };

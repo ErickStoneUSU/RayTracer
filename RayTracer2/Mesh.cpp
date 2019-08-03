@@ -3,64 +3,62 @@
 class Mesh : public Geometry {
 public:
 	Mesh() { ; }
-	Mesh(Point cent, Point rotat, Color col) { center = cent; rotation = rotat; color = col; }
-	Point center;
-	Point rotation; // todo decide how to handle this
 	vector<Triangle> tris;
-	Circle boundingBox;
-	float intensity;
+	Point center;
+	float scale;
 
 	Point norm(Point& p) {
 		return p;
 	}
 
-	void setBoundingBox() {
-		float tempRadius = 0;
-		for (auto t : tris) {
-			float d1 = (t.p1 - center).magnitude();
-			float d2 = (t.p2 - center).magnitude();
-			float d3 = (t.p3 - center).magnitude();
-			if (d1 > tempRadius) {
-				tempRadius = d1;
-			}
-			if (d2 > tempRadius) {
-				tempRadius = d2;
-			}
-			if (d3 > tempRadius) {
-				tempRadius = d3;
-			}
-		}
-		boundingBox.center = center;
-		boundingBox.radius = tempRadius;
-	}
-
 	// intersect on a circle is minimal
 	bool boundingBoxIntersect(Point& o, Point& dir, vector<Geometry*>& boundedList) {
-		return boundingBox.boundingBoxIntersect(o, dir,boundedList);
-	};
-
-	bool intersect(Point& o, Point& dir, float& distance, Geometry & contactObj, Point & contactPoint, Point & surfaceNormal) {
-		// find intersection in list of triangles
-		
-		float dist = 999999;
-		Geometry g;
-		for (Triangle t : tris) {
-			float temp = 999999;
-			Point tempPoint;
-			
-			if (t.intersect(o, dir, temp, g, tempPoint, surfaceNormal)) {
-				if (temp < dist) {
-					dist = temp;
-					contactPoint = tempPoint;
-					contactObj = g;
-				}
+		bool found = false;
+		for (auto t : tris) {
+			if (t.boundingBoxIntersect(o, dir, boundedList)) {
+				found = true;
 			}
 		}
-
-		if (dist == 999999) {
-			return false;
-		}
-
-		return true;
+		return found;
 	};
+
+	inline Mesh operator=(const Mesh& a) {
+		tris.clear();
+		center = a.center;
+		for (auto t : a.tris) {
+			tris.push_back(t);
+		}
+		return *this;
+	}
+
+	inline Mesh operator*(const float& a) {
+		scale = scale * a;
+		for (int i = 0; i < tris.size(); ++i) {
+			tris[i].p1 = tris[i].p1 * a;
+			tris[i].p2 = tris[i].p2 * a;
+			tris[i].p3 = tris[i].p3 * a;
+		}
+		return *this;
+	}
+
+	inline Mesh operator+(const Point& a) {
+		center = center + a;
+		for (int i = 0; i < tris.size(); ++i) {
+			tris[i].p1 = tris[i].p1 + a;
+			tris[i].p2 = tris[i].p2 + a;
+			tris[i].p3 = tris[i].p3 + a;
+		}
+		return *this;
+	}
+
+	inline Mesh rotate(float degrees) {
+		float invScale = 1.0 / scale;
+		Point invCenter = center * -1.0;
+		for (int i = 0; i < tris.size(); ++i) {
+			tris[i].p1 = (tris[i].p1 + invCenter) * invScale;
+			tris[i].p2 = (tris[i].p2 + invCenter) * invScale;
+			tris[i].p3 = (tris[i].p3 + invCenter) * invScale;
+		}
+		return *this;
+	}
 };

@@ -1,6 +1,8 @@
 #include "Light.cpp"
 #include "Settings.cpp"
 #include "Mesh.cpp"
+#include <tuple>
+#include <list>
 
 using namespace std;
 
@@ -130,24 +132,59 @@ public:
 	}
 
 	// todo figure this out
-	void getMesh(Circle & c) {
-		Mesh m;
-		int density = 10;
-		float pi = 3.1415f;
+	void getMesh(float rotate, float scale, Point move) {
+		const float density = 0.5f;
+		Triangle t = Triangle();
+		t.p1.z = move.z;
+		t.p2.z = move.z;
+		t.p3.z = move.z;
+		t.specular = 0;
+		t.transparency = 0;
+		t.color = Color(255, 255, 255);
 
-		for (int i = 0; i < density; ++i) {
-			float v = i * (pi / density);
-			for (int j = -density; j < density; ++j) {
-				float phi = j * (pi / density);
-				Triangle t;
-				t.p1 = Point(10, 10, 50);
-				t.p2 = Point(15, 15, 50);
-				t.p3 = Point(15, 10, 50);
-				t.color = Color(0, 0, 255);
-				m.tris.push_back(t);
+		for (int k = 1; k < 3; ++k) {
+			for (float i = 0; i < 1; i = i + density) {
+				Mesh m;
+				for (float j = 0; j < 1; j = j + density) {
+					t.p1.x = i + move.x;
+					t.p1.y = j + move.y;
+					t.p2.x = (i - 3 + k) + move.x;
+					t.p2.y = (j - 3 - k) + move.y;
+					t.p3.x = (i + 3) + move.x;
+					t.p3.y = (j + 3) + move.y;
+					t.color.b = 255 - (i * 255);
+					t.color.g = 255 / k;
+					t.setup();
+					m.tris.push_back(t);
+				}
+				geo.push_back(new Mesh(m));
 			}
 		}
+	}
+
+	void getMesh2(float rotate, float scale, Point move) {
+		Mesh m;
+		Point p1(0, 0, 0);
+		Point p2(-1, 0, 0);
+		Point p3(0, -1, 0);
+		Triangle t1 = Triangle();
+		t1.color = Color(255, 255, 255);
+		t1.specular = 0;
+		t1.transparency = 0;
+
+		t1.p1 = p1;
+		t1.p2 = p2;
+		t1.p3 = p3;
+
+		m.tris.push_back((t1 * scale) + move);
+		m.tris.push_back((t1 * scale) + move + Point(0,3,0));
+		//m.tris.push_back(((t1 * scale) + move) * 2);
 		geo.push_back(new Mesh(m));
+		/*Mesh n = m;
+		geo.push_back(new Mesh(n + Point(3, 0, 1)));
+		Mesh o = m;
+		geo.push_back(new Mesh(o + Point(-3, 0, 1)));*/
+
 	}
 
 	void getCircle() {
@@ -219,12 +256,13 @@ public:
 		// be in the middle of the film
 		cam.point = Point(0, 0, 0);
 		//getForeground();
-		getBackGround();
+		//getBackGround();
+		getMesh2(1, 2, Point(0, 0, 75));
 		//getTopBackGround();
 		//getBottomBackGround();
 		//getLeftBackGround();
 		//getRightBackGround();
-		getCircle();
+		//getCircle();
 		getLight();
 	}
 	Scene() {

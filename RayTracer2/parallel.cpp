@@ -92,6 +92,9 @@ void getClosestObject(Scene & s, int & objNums, Point & p, Point & ray, Geometry
 		else if (Triangle * c = dynamic_cast<Triangle*>(g)) {
 			c->boundingBoxIntersect(p, ray, boundedList);
 		}
+		else if (Mesh * c = dynamic_cast<Mesh*>(g)) {
+			c->boundingBoxIntersect(p, ray, boundedList);
+		}
 	}
 	for (auto b : boundedList) {
 		float tempt = FLT_MAX;
@@ -158,6 +161,7 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 	
 	// if an object is found
 	if (found) {	
+		return Color(255, 255, 255);
 		Color specular(0, 0, 0); 
 		Color refraction(0, 0, 0);
 		Color diffuse(0, 0, 0);
