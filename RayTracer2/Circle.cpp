@@ -15,6 +15,23 @@ public:
 	float invRadius; // precalculate invRadius because this is hit a lot
 	const float SELF_AVOID_T = .001;
 
+	Color getColor (Point& nextPoint) const{
+		Point n = (nextPoint - center).norm();
+		// do uv transform to spherical coordinates
+		// the x4 was a hack to give some variety
+		const float u = 0.5 + atan2(n.z, n.x) * 0.1591549; // 1 / (2 * PI)
+		const float v = 0.5 - asin(n.y) * 0.318309; // 1 / PI
+		int vr = int(v * 10);
+		int ur = int(u * 10);
+		if (vr == 1 || ur == 2 || vr == 3 || ur == 4 || vr == 5 ||
+			ur == 6 || vr == 7 || ur == 8 || vr == 9 || ur == 10) {
+			return Color(255, 255, 255);
+		} 
+		else {
+			return Color(0, 0, 0);
+		}
+	};
+
 	Point norm(Point p) {
 		return ((p - center) * invRadius).norm();
 	}
@@ -49,6 +66,12 @@ public:
 		}
 		contactPoint = o + r * t;
 		surfaceNormal = (contactPoint - center).norm();
+		if (texture.isUV){
+			auto temp = getColor(contactPoint); 
+			if (temp.r == 0 && temp.g == 0 && temp.b == 0){
+				return false;
+			}
+		}
 		return true;
 	}
 

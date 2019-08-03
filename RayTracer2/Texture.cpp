@@ -20,8 +20,8 @@ struct Texture {
 		if (isUV) {
 			// do uv transform to spherical coordinates
 			// the x4 was a hack to give some variety
-			const float u = 0.5 + atan2(n.z, n.x) * 0.1591549 * 32; // 1 / (2 * PI)
-			const float v = 0.5 - asin(n.y) * 0.318309 * 32;
+			const float u = 0.5 + atan2(n.z, n.x) * 0.1591549; // 1 / (2 * PI)
+			const float v = 0.5 - asin(n.y) * 0.318309; // 1 / PI
 			const int index = abs(int(u + v)) % int(pattern.size());
 			return pattern[index];
 		}

@@ -130,7 +130,7 @@ public:
 	}
 
 	// todo figure this out
-	void convertToTriangles(Circle & c) {
+	void getMesh(Circle & c) {
 		Mesh m;
 		int density = 10;
 		float pi = 3.1415f;
@@ -152,6 +152,7 @@ public:
 
 	void getCircle() {
 		Circle cir(Point(-6., 6, 75), 3, Color(255, 255, 255));
+		cir.texture.setPatternToCheckers();
 		cir.thickness = 1;
 		cir.specular = 0.5;
 		cir.transparency = 0;
@@ -162,7 +163,6 @@ public:
 		cir.center = Point(6, 6, 75);
 		geo.push_back(new Circle(cir));
 
-		cir.texture.setPatternToCheckers();
 		cir.texture.isUV = true;
 		cir.color = Color(255, 255, 255);
 		cir.thickness = 1.1;
@@ -171,7 +171,6 @@ public:
 		cir.center = Point(3, 0, 75);
 		geo.push_back(new Circle(cir));
 
-		cir.texture.isUV = true;
 		cir.color = Color(255, 255, 255);
 		cir.thickness = 1.7;
 		cir.specular = 0;
@@ -203,7 +202,7 @@ public:
 		//l.push_back(light);
 		
 		light = Light(Point(0, 0, 60), 0.1, Color(0, 255, 0));
-		l.push_back(light);
+		//l.push_back(light);
 
 		light = Light(Point(-8, 0, 60), 0.1, Color(0, 0, 255));
 		//l.push_back(light);
