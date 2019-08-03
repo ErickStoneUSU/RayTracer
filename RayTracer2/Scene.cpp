@@ -197,23 +197,27 @@ public:
 		//geo.push_back(new Circle(cir));
 
 		cir.color = Color(255, 255, 255);
-		cir.center = Point(6, 6, 75);
+		cir.center = Point(6, 0, 75);
 		geo.push_back(new Circle(cir));
+
+		cir.center = Point(6, 0, 75);
+		//geo.push_back(new Circle(cir));
+
 
 		cir.texture.isUV = true;
 		cir.color = Color(255, 255, 255);
 		cir.thickness = 1.1;
 		cir.specular = 0;
 		cir.transparency = 0.5;
-		cir.center = Point(3, 0, 75);
-		geo.push_back(new Circle(cir));
+		cir.center = Point(6, 0, 75);
+		//geo.push_back(new Circle(cir));
 
 		cir.color = Color(255, 255, 255);
 		cir.thickness = 1.7;
 		cir.specular = 0;
 		cir.transparency = 0;
 		cir.center = Point(-9, 6, 75);
-		geo.push_back(new Circle(cir));
+		//geo.push_back(new Circle(cir));
 
 		//cir.center = Point(0, -6, 70);
 		//cir.specular = 0.5;
@@ -257,12 +261,12 @@ public:
 		cam.point = Point(0, 0, 0);
 		//getForeground();
 		//getBackGround();
-		getMesh2(1, 2, Point(0, 0, 75));
+		//getMesh2(1, 2, Point(0, 0, 75));
 		//getTopBackGround();
 		//getBottomBackGround();
 		//getLeftBackGround();
 		//getRightBackGround();
-		//getCircle();
+		getCircle();
 		getLight();
 	}
 	Scene() {

@@ -54,6 +54,7 @@ public:
 	inline Mesh rotate(float degrees) {
 		float invScale = 1.0 / scale;
 		Point invCenter = center * -1.0;
+		
 		for (int i = 0; i < tris.size(); ++i) {
 			tris[i].p1 = (tris[i].p1 + invCenter) * invScale;
 			tris[i].p2 = (tris[i].p2 + invCenter) * invScale;

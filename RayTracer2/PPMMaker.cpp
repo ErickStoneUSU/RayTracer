@@ -5,9 +5,11 @@
 #include <algorithm>
 #include "Color.cpp"
 #include "Settings.cpp"
+#include <tuple>
 
 const string base = "Image\\";
 using namespace std;
+
 struct PPMMaker {
 	PPMMaker() {};
 
@@ -75,6 +77,71 @@ struct PPMMaker {
 		for (int i = 0; i < DIM; ++i) {
 			vector<ifstream *> v;
 			
+			for (int j = 0; j < DIM; ++j) {
+				ifstream* f = new ifstream(base + "body_" + to_string(i) + "_" + to_string(j) + ".ppm", ios::in);
+				v.push_back(f);
+			}
+			string line;
+			while (!(*(v[0])).eof()) {
+				for (auto& file : v) {
+					getline(*file, line);
+					//line.erase(remove(line.begin(), line.end(), '\n'), line.end());
+					out << line << "   ";
+				}
+				out << "\n";
+			}
+			for (auto& file : v) {
+				(*file).close();
+			}
+		}
+		out.close();
+	}
+
+	// from https://stackoverflow.com/questions/53849/how-do-i-tokenize-a-string-in-c
+	vector<string> split(const char* str, char c = ' ')
+	{
+		vector<string> result;
+
+		do
+		{
+			const char* begin = str;
+
+			while (*str != c && *str)
+				str++;
+
+			result.push_back(string(begin, str));
+		} while (0 != *str++);
+
+		return result;
+	}
+
+	void stereogram() {
+		ifstream in;
+		in.open(base + "amerged.ppm");
+		ofstream out;
+		out.open(base + "stereogram.ppm");
+		out << "P3\n" << XDIM << " " << YDIM << "\n" << "255\n";
+		string line;
+		
+		while (!in.eof()) {
+			
+			getline(in,line);
+			// exclude non relevant lines such as header
+			if (line.length() > 20) {
+				// get the rgb values
+				vector <tuple<int, int, int>> lineNums;
+				vector<string> spl = split(line.c_str(), ' ');
+				for (int i = 0; i < spl.size() - 2; i += 3) {
+					int r = stoi(spl[i]);
+					int g = stoi(spl[i+1]);
+					int b = stoi(spl[i+2]);
+					lineNums.push_back( tuple<int,int,int>(r,g,b));
+				}
+			}
+		}
+		for (int i = 0; i < DIM; ++i) {
+			vector<ifstream*> v;
+
 			for (int j = 0; j < DIM; ++j) {
 				ifstream* f = new ifstream(base + "body_" + to_string(i) + "_" + to_string(j) + ".ppm", ios::in);
 				v.push_back(f);

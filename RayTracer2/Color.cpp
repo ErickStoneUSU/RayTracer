@@ -3,8 +3,19 @@
 using namespace std;
 class Color { 
 public:
-	Color() { r = 0; g = 0; b = 0; }
-	Color(int i, int j, int k) { r = i; g = j; b = k; } 
+	Color() { r = 0; g = 0; b = 0; 
+		r = (r < 0) ? 0 : (r > 255) ? 255 : r;
+		g = (g < 0) ? 0 : (g > 255) ? 255 : g;
+		b = (b < 0) ? 0 : (b > 255) ? 255 : b;
+	}
+	Color(int i, int j, int k) { r = i; g = j; b = k;
+	if (r < 0) {
+		r = 0;
+	}
+		r = (r < 0) ? 0 : (r > 255) ? 255 : r;
+		g = (g < 0) ? 0 : (g > 255) ? 255 : g;
+		b = (b < 0) ? 0 : (b > 255) ? 255 : b;
+	} 
 	int r, g, b;
 	inline Color operator+(const Color& a) {
 		Color c(a.r + r, a.g + g, a.b + b);

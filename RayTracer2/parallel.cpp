@@ -145,7 +145,7 @@ Color getColorLight(Color obj, Color light) {
 
 
 
-Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) {
+Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) { 
 	// only allow a certain level for light bounces
 	if (depth > 2){ return black; }
 
@@ -161,53 +161,13 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 	
 	// if an object is found
 	if (found) {	
-		return Color(255, 255, 255);
-		Color specular(0, 0, 0); 
-		Color refraction(0, 0, 0);
-		Color diffuse(0, 0, 0);
-
-		if (closestObj->specular > 0.0)
-		{
-			// normalize the direction and add a very tiny amount to prevent object from hitting exactly itself
-			Point reflectRay = getReflectRay(p, ray, surfaceNormal).norm() + 0.0001;
-			specular = getColor(s, objNums, nextPoint, reflectRay, ++depth, refInd) * closestObj->specular;
+		float c = nextPoint.magnitude();
+		float b = eyeDistance;
+		float depth = sqrt(c * c + eyeDistance) - 72;
+		if (depth > 1) {
+			c = c + 1;
 		}
-		if (closestObj->transparency > 0.0)
-		{
-			Point refractRay = getRefractRay(p, ray, refInd, closestObj->thickness, surfaceNormal).norm() + 0.0001;
-			refraction = getColor(s, objNums, nextPoint, refractRay, ++depth, closestObj->thickness) * closestObj->transparency;
-		}
-		
-		// get diffuse component
-		for (Light l : s.l) {
-			// todo get the point on the circle closest to the nextPoint
-			Point lightRay = (l.point - nextPoint).norm();
-			float lightDist = (l.point - nextPoint).magnitude();
-
-			// todo which is less expensive checking the light intersection or checking the shadow?
-			if (castShadowRay(s, nextPoint, lightRay)) {
-				// the amount that is reflected in the direction of the light
-				// lambertian shading
-				Texture tex = closestObj->texture;
-				if (tex.pattern.size() > 0) {
-					if (tex.isUV) {
-						Color uvc = dynamic_cast<Circle*>(closestObj)->getColor(nextPoint);
-						diffuse = diffuse + uvc * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
-					}
-					else {
-						diffuse = diffuse + tex.getColor(nextPoint) * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
-					}
-				}
-				else {
-					diffuse = diffuse + l.color * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
-				}
-			}
-		}
-
-		// get reflective component
-		return specular + // specular
-			diffuse + // diffuse
-			refraction; // refraction
+		return Color(255 * depth, 255 * depth, 255 * depth);
 	}
 	return black;
 }
@@ -272,6 +232,71 @@ void mainLoop() {
 	return;
 }
 
+void stereogram() {
+	vector<float> vecOfRandomNums(1000);
+	for (int i = 0; i < vecOfRandomNums.size(); ++i) { vecOfRandomNums[i] = rand() % 100 / 1000.0; }
+	vector<float> vecOfRandomNums2(1000);
+	for (int i = 0; i < vecOfRandomNums2.size(); ++i) { vecOfRandomNums2[i] = rand() % 255; }
+	vector<float> vecOfRandomNums3(1000);
+	for (int i = 0; i < vecOfRandomNums3.size(); ++i) { vecOfRandomNums3[i] = rand() % 100 / 100.0f; }
+	Scene s = Scene();
+	Color c = Color();
+	vector<vector<Color>> cList;
+
+	// allocate the size of the vector
+	vector<Color> temp;
+	for (int j = 0; j < DIM; ++j)
+	{
+		temp.push_back(Color(0, 0, 0));
+	}
+
+	for (int i = 0; i < DIM; ++i)
+	{
+		cList.push_back(temp);
+	}
+	clock_t start, end;
+	start = clock();
+	int objNums = s.geo.size();
+	Point cam = s.cam.point;
+	const float offset = -DIM * DIM / 2;
+
+	for (int i = 0; i < DIM; ++i)
+	{
+		for (int j = 0; j < DIM; ++j)
+		{
+			for (int k = 0; k < DIM; ++k)
+			{
+				parallel_for(0, DIM, [&](size_t l)
+					{
+						// todo consider moving the random to a random point on the found triangle
+						// normalize to be a scale of 0 to 1
+						// the offset positions 0,0 in the middle
+						// the huge z avoids fish eye by having the beam mostly focus forward
+						Point p = (cam - Point(float(j * DIM + l) + offset, float(i * DIM + k) + offset, -1000)).norm();
+						
+						Color color(0, 0, 0);
+						int r = 0, g = 0, b = 0;
+						for (int m = 0; m < 10; ++m) {
+							color = getColor(s, objNums, cam + vecOfRandomNums[m], p, 0, 1);
+							r += color.r;
+							g += color.g;
+							b += color.b;
+						}
+						Color random(vecOfRandomNums2[k] * vecOfRandomNums3[j+k+l], vecOfRandomNums2[k] * vecOfRandomNums3[j + k + l], vecOfRandomNums2[k] * vecOfRandomNums3[j + k + l]);
+						Color previous = cList[k][l];
+						Color current = Color(r * .1, g * .1, b * .1);
+						cList[k][l] = current;
+					});
+			}
+			PPMMaker().writeBlock(cList, i, j);
+		}
+	}
+	end = clock();
+	double duration_sec = (double(end) - double(start)) / CLOCKS_PER_SEC;
+	std::cout << duration_sec;
+	return;
+}
+
 // old notes
 // camera point -> (0,0,0) and film point -> (i,j,1)
 // get ray 
@@ -307,7 +332,7 @@ void mainLoop() {
 	// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-ray-tracing/adding-reflection-and-refraction
 
 int main() {
-	mainLoop();
-	PPMMaker().mergeFile();
+	//stereogram();
+	PPMMaker().stereogram();
 	return 0;
 }
