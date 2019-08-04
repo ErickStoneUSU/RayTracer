@@ -188,48 +188,50 @@ public:
 	}
 
 	void getCircle() {
-		Circle cir(Point(-6., 6, 75), 3, Color(255, 255, 255));
+		Circle cir(Point(-6., 6, 75), 10, Color(255, 255, 255));
 		cir.texture.setPatternToCheckers();
 		cir.thickness = 1;
-		cir.specular = 0.5;
+		cir.specular = 0;
 		cir.transparency = 0;
 		
 		//geo.push_back(new Circle(cir));
 
 		cir.color = Color(255, 255, 255);
-		cir.center = Point(6, 0, 75);
+		cir.center = Point(0, 0, 75);
 		geo.push_back(new Circle(cir));
 
-		cir.center = Point(6, 0, 75);
+		//cir.center = Point(3, 6, 75);
 		//geo.push_back(new Circle(cir));
 
-
-		cir.texture.isUV = true;
-		cir.color = Color(255, 255, 255);
-		cir.thickness = 1.1;
-		cir.specular = 0;
-		cir.transparency = 0.5;
-		cir.center = Point(6, 0, 75);
+		//cir.center = Point(6, 0, 75);
 		//geo.push_back(new Circle(cir));
 
-		cir.color = Color(255, 255, 255);
-		cir.thickness = 1.7;
-		cir.specular = 0;
-		cir.transparency = 0;
-		cir.center = Point(-9, 6, 75);
-		//geo.push_back(new Circle(cir));
-
-		//cir.center = Point(0, -6, 70);
-		//cir.specular = 0.5;
-		//cir.radius = 3;
+		//cir.texture.isUV = true;
+		//cir.color = Color(255, 255, 255);
+		//cir.thickness = 1.1;
+		//cir.specular = 0;
 		//cir.transparency = 0.5;
+		//cir.center = Point(6, 0, 75);
+		//geo.push_back(new Circle(cir));
+
+		//cir.color = Color(255, 255, 255);
+		//cir.thickness = 1.7;
+		//cir.specular = 0;
+		//cir.transparency = 0;
+		//cir.center = Point(-9, 6, 75);
+		//geo.push_back(new Circle(cir));
+
+		////cir.center = Point(0, -6, 70);
+		////cir.specular = 0.5;
+		////cir.radius = 3;
+		////cir.transparency = 0.5;
 		//geo.push_back(new Circle(cir));
 
 
 		//cir.center = Point(0, 6, 100);
 		//cir.specular = 0.5;
 		//cir.transparency = 0.5;
-		//geo.push_back(new Circle(cir));
+		geo.push_back(new Circle(cir));
 	}
 
 	void getLight() {

@@ -43,10 +43,10 @@ struct PPMMaker {
 				//	file << r << "   " << g << "   " << b;
 				//}
 				//else {
-					file << cList[i][j].r << "   " << cList[i][j].g << "   " << cList[i][j].b;
+					file << cList[i][j].r << " " << cList[i][j].g << " " << cList[i][j].b;
 				//}
 				if (j != DIM - 1) {
-					file << "     ";
+					file << " ";
 				}
 			}
 
@@ -86,7 +86,7 @@ struct PPMMaker {
 				for (auto& file : v) {
 					getline(*file, line);
 					//line.erase(remove(line.begin(), line.end(), '\n'), line.end());
-					out << line << "   ";
+					out << line << " ";
 				}
 				out << "\n";
 			}
@@ -116,49 +116,147 @@ struct PPMMaker {
 	}
 
 	void stereogram() {
+		const int eyeWidth = DIM * DIM / 2;
 		ifstream in;
 		in.open(base + "amerged.ppm");
 		ofstream out;
 		out.open(base + "stereogram.ppm");
-		out << "P3\n" << XDIM << " " << YDIM << "\n" << "255\n";
+		out << "P3\n" << XDIM * 2 - 2 << " " << YDIM << "\n" << "255\n";
 		string line;
-		
+		bool even = false;
+		bool debug = true;
+		int cou = 0;
 		while (!in.eof()) {
 			
 			getline(in,line);
+
+			// populate rgb values into lineNums
 			// exclude non relevant lines such as header
 			if (line.length() > 20) {
+				++cou;
 				// get the rgb values
 				vector <tuple<int, int, int>> lineNums;
 				vector<string> spl = split(line.c_str(), ' ');
-				for (int i = 0; i < spl.size() - 2; i += 3) {
-					int r = stoi(spl[i]);
-					int g = stoi(spl[i+1]);
-					int b = stoi(spl[i+2]);
-					lineNums.push_back( tuple<int,int,int>(r,g,b));
-				}
-			}
-		}
-		for (int i = 0; i < DIM; ++i) {
-			vector<ifstream*> v;
+				int r;
+				int g;
+				int b;
+				int sequence = 0;
+				for (int i = 0; i < spl.size() - 2; ++i) {
+					if (spl[i] != "") {
+						if (sequence == 0) {
+							r = stoi(spl[i]);
+							sequence += 1;
+						}
+						else if (sequence == 1) {
+							g = stoi(spl[i]);
+							sequence += 1;
 
-			for (int j = 0; j < DIM; ++j) {
-				ifstream* f = new ifstream(base + "body_" + to_string(i) + "_" + to_string(j) + ".ppm", ios::in);
-				v.push_back(f);
-			}
-			string line;
-			while (!(*(v[0])).eof()) {
-				for (auto& file : v) {
-					getline(*file, line);
-					//line.erase(remove(line.begin(), line.end(), '\n'), line.end());
-					out << line << "   ";
+						}
+						else if (sequence == 2) {
+							b = stoi(spl[i]);
+							sequence = 0;
+							lineNums.push_back(tuple<int, int, int>(r, g, b));
+						}
+					}
+				}
+
+				//populate random values into outVector equivalent to size of input
+				vector <tuple<int, int, int>> outVector;
+				for (int i = 0; i < int((lineNums.size() - 1) / 2); ++i) {
+					
+					if (i % ((XDIM * 2 - 2) / 4) == 0) {
+							outVector.push_back(tuple<int, int, int>(25,25,25));
+					}
+					else {
+						if (debug) {
+							outVector.push_back(tuple<int, int, int>(0, 0, 0));
+						}
+						else {
+							outVector.push_back(tuple<int, int, int>(rand() % 255, rand() % 255, rand() % 255));
+						}
+					}
+				}
+
+				// populate right side with offset
+				int outSize = outVector.size();
+				for (int i = 0; i < outSize; ++i) {
+					outVector.push_back(outVector[i]);
+				}
+
+				// populate 3 and 4
+				outSize = outVector.size();
+				for (int i = 0; i < outSize; ++i) {
+					outVector.push_back(outVector[i]);
+				}
+
+
+				float lefteye = -150;
+				float righteye = 150;
+				float filmDepth = 40000;
+				for (int i = 0; i < lineNums.size(); ++i) {
+				   // if the image has depth
+				   // use the depth to get the locations of intersect and shift them by 1
+				   // replicate across the distance across the image
+					float m = get<0>(lineNums[i]);
+					if ( m > 0) {
+						m = 255;
+						// has depth
+
+						// triangle with smaller triangle ratio
+						// side / side == smaller side / smaller side
+						float filmLeftDist = m * abs(lefteye - i) / (m+filmDepth);
+						float filmRightDist = m * abs(righteye - i) / (m + filmDepth);
+
+						if ((filmRightDist + i < outVector.size()) && (i - filmLeftDist > 0)) {
+							if (debug) {
+								//for (int j = i; j < outVector.size(); j += abs(filmLeftDist - filmRightDist)) {
+									outVector[i + filmRightDist] = tuple<int, int, int>(255, 255, 255);
+									//outVector[j - filmLeftDist] = tuple<int, int, int>(255, 255, 255);
+								//}
+								
+							}
+							else {
+								for (int j = i; j < outVector.size(); j += abs(filmLeftDist - filmRightDist)) {
+									outVector[i + filmRightDist] = outVector[i - filmLeftDist];
+								}
+							}
+							
+						}
+					}
+				}
+
+
+				// simulate eye width offset;
+				//for (int i = 0; i < lineNums.size(); ++i) {
+				//	auto a = lineNums[i];
+				//	int inten = get<0>(a) + get<1>(a) + get<2>(a);
+				//	if (inten > 0) {
+				//		for (int j = i; j > 0; j -= eyeWidth) {
+				//			//outVector[j] = outVector[j - 1];
+				//			//outVector[j] = tuple<int, int, int>(255, 255, 255);
+				//		}
+				//		for (int j = i; j < outVector.size(); j += eyeWidth) {
+				//			if (debug) {
+				//				outVector[j] = tuple<int, int, int>(255, 255, 255);
+				//			}
+				//			else {
+				//				outVector[j] = outVector[j - 1];
+				//			}
+				//		}
+				//	}
+				//}
+
+				for (int i = 0; i < outVector.size(); ++i) {
+					out << get<0>(outVector[i]) << " " << get<1>(outVector[i]) << " " << get<2>(outVector[i]);
+					if (i != outVector.size() - 1) {
+						out << " ";
+					}
 				}
 				out << "\n";
 			}
-			for (auto& file : v) {
-				(*file).close();
-			}
 		}
+
 		out.close();
+		in.close();
 	}
 };
