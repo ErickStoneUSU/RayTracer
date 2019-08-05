@@ -188,7 +188,7 @@ public:
 	}
 
 	void getCircle() {
-		Circle cir(Point(-6., 6, 75), 10, Color(255, 255, 255));
+		Circle cir(Point(-6., 6, 75), 7, Color(255, 255, 255));
 		cir.texture.setPatternToCheckers();
 		cir.thickness = 1;
 		cir.specular = 0;

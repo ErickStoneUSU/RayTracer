@@ -143,8 +143,6 @@ Color getColorLight(Color obj, Color light) {
 	return Color(r, g, b);
 }
 
-
-
 Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) { 
 	// only allow a certain level for light bounces
 	if (depth > 2){ return black; }
@@ -171,7 +169,6 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 	}
 	return black;
 }
-
 
 void mainLoop() {
 	vector<float> vecOfRandomNums(1000);
@@ -333,6 +330,6 @@ void stereogram() {
 
 int main() {
 	//stereogram();
-	PPMMaker().stereogram();
+	PPMMaker().stereogram(false, 303, 313, 30000);
 	return 0;
 }
