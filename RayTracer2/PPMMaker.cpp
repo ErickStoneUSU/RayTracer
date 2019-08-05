@@ -206,8 +206,8 @@ struct PPMMaker {
 
 							// triangle with smaller triangle ratio
 							// side / side == smaller side / smaller side
-							float filmRightDist = abs(righteye - i) * (eyeNormToPlane - m) / (eyeNormToPlane - m + 255) + i;
-							float filmLeftDist = abs(i - lefteye) * (eyeNormToPlane - m) / (eyeNormToPlane - m + 255) + i;
+							float filmRightDist = (righteye - i) * (eyeNormToPlane - m) / (eyeNormToPlane - m + 255) + i;
+							float filmLeftDist = (i - lefteye) * (eyeNormToPlane - m) / (eyeNormToPlane - m + 255) + i;
 							
 							if ((filmRightDist + i < outVector.size()) && (i - filmLeftDist > 0)) {
 								auto color = i - filmLeftDist;
@@ -221,10 +221,10 @@ struct PPMMaker {
 								}
 								else {
 									for (int j = i + filmRightDist; j < outVector.size(); j += filmLeftDist + filmRightDist) {
-										outVector[j] = outVector[i - filmLeftDist];
+										outVector[j] = outVector[i - filmLeftDist - 1];
 									}
 									for (int j = i - filmLeftDist; j > 0; j -= filmLeftDist + filmRightDist) {
-										outVector[j] = outVector[i - filmLeftDist];
+										outVector[j] = outVector[i - filmLeftDist - 1];
 									}
 								}
 
