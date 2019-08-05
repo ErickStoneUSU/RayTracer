@@ -10,8 +10,6 @@
 using namespace std;
 using namespace concurrency;
 void mainLoop();
-bool rayTrace(Triangle t, Point camera, Point ray, float& tempt);
-Color getRadiance(Scene& s, int& objNums, Point p, Point ray, int depth);
 const Color black(0, 0, 0);
 
 Point getReflectRay(Point & p, Point & ray, Point & surfaceNormal) {
@@ -143,7 +141,7 @@ Color getColorLight(Color obj, Color light) {
 	return Color(r, g, b);
 }
 
-Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) { 
+Color getStereoColor(Scene & s, int & objNums, Point p, Point ray, int depth, float refInd) { 
 	// only allow a certain level for light bounces
 	if (depth > 2){ return black; }
 
@@ -166,6 +164,69 @@ Color getColor(Scene & s, int & objNums, Point p, Point ray, int depth, float re
 			c = c + 1;
 		}
 		return Color(255 * depth, 255 * depth, 255 * depth);
+	}
+	return black;
+}
+
+Color getColor(Scene& s, int& objNums, Point p, Point ray, int depth, float refInd) {
+	// only allow a certain level for light bounces
+	if (depth > 2) { return black; }
+
+	// radiance is the amount of light / the area
+	// the area is the cosine of the angle
+
+	float t = FLT_MAX;
+	Geometry* closestObj;
+	bool found = false;
+	Point surfaceNormal;
+	Point nextPoint;
+	getClosestObject(s, objNums, p, ray, closestObj, t, found, surfaceNormal, nextPoint);
+
+	// if an object is found
+	if (found) {
+		Color specular(0, 0, 0);
+		Color refraction(0,0,0);
+		Color diffuse(0,0,0);
+
+		if (closestObj->specular > 0.0) {
+			// normalize the direction and add a very tiny amount to prevent object from hitting exactly itself	
+			Point reflectRay = getReflectRay(p, ray, surfaceNormal).norm() + 0.0001;
+			specular = getColor(s, objNums, nextPoint, reflectRay, ++depth, refInd) * closestObj->specular;
+		}
+		if (closestObj->transparency > 0.0) {
+			Point refractRay = getRefractRay(p, ray, refInd, closestObj->thickness, surfaceNormal).norm() + 0.0001;
+			refraction = getColor(s, objNums, nextPoint, refractRay, ++depth, closestObj->thickness) * closestObj->transparency;
+		}
+		// get diffuse component	
+		for (Light l : s.l) {
+			// todo get the point on the circle closest to the nextPoint	
+			Point lightRay = (l.point - nextPoint).norm();
+			float lightDist = (l.point - nextPoint).magnitude();
+
+			// todo which is less expensive checking the light intersection or checking the shadow?	
+			if (castShadowRay(s, nextPoint, lightRay)) {
+				// the amount that is reflected in the direction of the light	
+				// lambertian shading	
+				Texture tex = closestObj->texture;
+				if (tex.pattern.size() > 0) {
+					if (tex.isUV) {
+						Color uvc = dynamic_cast<Circle*>(closestObj)->getColor(nextPoint);
+						diffuse = diffuse + uvc * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
+					}
+					else {
+						diffuse = diffuse + tex.getColor(nextPoint) * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
+					}
+				}
+				else {
+					diffuse = diffuse + l.color * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
+				}
+			}
+		}
+
+		// get reflective component	
+		return specular + // specular	
+			diffuse + // diffuse	
+			refraction; // refraction
 	}
 	return black;
 }
@@ -274,7 +335,7 @@ void stereogram() {
 						Color color(0, 0, 0);
 						int r = 0, g = 0, b = 0;
 						for (int m = 0; m < 10; ++m) {
-							color = getColor(s, objNums, cam + vecOfRandomNums[m], p, 0, 1);
+							color = getStereoColor(s, objNums, cam + vecOfRandomNums[m], p, 0, 1);
 							r += color.r;
 							g += color.g;
 							b += color.b;
@@ -329,7 +390,9 @@ void stereogram() {
 	// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-ray-tracing/adding-reflection-and-refraction
 
 int main() {
-	stereogram();
-	PPMMaker().stereogram(false, 303, 313, 30000);
+	mainLoop();
+	PPMMaker().mergeFile();
+	//stereogram();
+	//PPMMaker().stereogram(false, 303, 313, 30000);
 	return 0;
 }
