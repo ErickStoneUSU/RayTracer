@@ -329,7 +329,7 @@ void stereogram() {
 	// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-ray-tracing/adding-reflection-and-refraction
 
 int main() {
-	//stereogram();
+	stereogram();
 	PPMMaker().stereogram(false, 303, 313, 30000);
 	return 0;
 }
