@@ -188,10 +188,10 @@ public:
 	}
 
 	void getCircle() {
-		Circle cir(Point(-6, 6, 75), 3, Color(255, 255, 255));
+		Circle cir(Point(-6, 6, 75), 3, Color(255, 0, 0));
 		//cir.texture.setPatternToCheckers();
 		cir.thickness = 1.5;
-		cir.specular = 1;
+		cir.specular = 0;
 		cir.transparency = 0;
 		
 		geo.push_back(new Circle(cir));
@@ -210,7 +210,7 @@ public:
 	}
 
 	void getLight() {
-		Light light = Light(Point(10, 0, 65), 100, Color(0, 255, 0));
+		Light light = Light(Point(10, 0, 65), 100, Color(255, 255, 255));
 		//l.push_back(light);
 
 		light = Light(Point(0, 0, 60), 0.1, Color(255, 255, 255));
