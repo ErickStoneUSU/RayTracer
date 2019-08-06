@@ -1,0 +1,50 @@
+A stereogram is an image which initially seems blurry. When viewed at a specific blur howevr, an image pops from the page.
+Setup:
+First we need to build a random image.
+Second we need to build a depth map of the image you want seen in the illusion.
+Third we need to determine where our eyes wil be located.
+
+Process:
+We take the random color image and iterate row by row.
+We iterate across the pixels in each row.
+For each pixel, we get the point on the depth map.
+We cast a ray from each eye to the depth map point.
+The point of intersection of those two rays and the random map is need to be the same.
+In fact, we not only make them the same, but jump left and right of those intersection points and make each of those the same color.
+The distance we jump is the distance between the initial left and right intersections.
+
+That is it as once every pixel in the depth map has been hit, the random map is populated with a stereogram.
+
+There are however some troublesome components to this:
+- first we must decide where to put the eyes.
+- second we must decide how high the strip of random image should be above the eyes.
+- third we must decide how high the depth map should begin at and how far it should span.
+
+
+Some notes for construction:
+The eye to depth map point can be found by either directly casting a ray in 2d or by using trigonometry.
+To do so with trig, you build two right triangles as shown in the StudentChoice image on the upper left section.
+You then find the distance from the random image pixel to the intersecting pixels.
+The small triangle can be seen in the bottom right image.
+This can be done many ways, but I have chosen to use the ratio of side to side.
+
+Ratio:
+tan(@) = opposite(big) / adjacent(big).
+tan(@) = opposite(small) / adjacent(small).
+opposite(big) / adjacent(big) = opposite(small) / adjacent(small).
+
+Big Triangles:
+- Left: EYE Left -> Object Intersection -> pixel at eye level
+- Right: EYE Right -> Object Intersection -> pixel at eye level
+
+Small Triangles:
+- Left: Intersection Left -> Object Intersection -> pixel at random map level
+- Right: Intersection Right -> Object Intersection -> pixel at random map level
+
+The math:
+(eyeRight - i) / (255-depth + eyeToFilm + filmToDepthMap)  == (x-i)/(255-depth + filmToDepthMap);
+(i - eyeLeft) / (255-depth + eyeToFilm + filmToDepthMap)  == (y-i)/(255-depth + filmToDepthMap); 
+
+The code:
+float filmRightDist = (righteye - i) * (eyeNormToPlane - m) / (eyeNormToPlane - m + 255) + i;
+float filmLeftDist = (i - lefteye) * (eyeNormToPlane - m) / (eyeNormToPlane - m + 255) + i;

@@ -5,6 +5,7 @@
 #include <time.h>
 #include "Scene.cpp"
 #include "PPMMaker.cpp"
+#include <algorithm>
 
 
 using namespace std;
@@ -170,7 +171,7 @@ Color getStereoColor(Scene & s, int & objNums, Point p, Point ray, int depth, fl
 
 Color getColor(Scene& s, int& objNums, Point p, Point ray, int depth, float refInd) {
 	// only allow a certain level for light bounces
-	if (depth > 2) { return black; }
+	if (depth > 10) { return black; }
 
 	// radiance is the amount of light / the area
 	// the area is the cosine of the angle
@@ -220,6 +221,69 @@ Color getColor(Scene& s, int& objNums, Point p, Point ray, int depth, float refI
 				else {
 					diffuse = diffuse + l.color * (abs(surfaceNormal.dot(lightRay))) * (1 - (closestObj->specular + closestObj->transparency));
 				}
+			}
+		}
+
+		// get diffuse component	
+		for (Geometry* g : s.geo) {
+			if (g != closestObj) {
+				if (Circle * cir = dynamic_cast<Circle*>(g)) {
+					// todo get the point on the circle closest to the nextPoint	
+					Point gRay = (cir->center - nextPoint).norm();
+					float gDist = (cir->center - nextPoint - gRay * cir->radius).magnitude();
+
+					if (gDist < 1) {
+						gDist = 1;
+					}
+
+					// todo which is less expensive checking the light intersection or checking the shadow?	
+					Texture tex = closestObj->texture;
+					Color diffPrev = diffuse;
+					if (tex.pattern.size() > 0) {
+						if (tex.isUV) {
+							Color uvc = dynamic_cast<Circle*>(closestObj)->getColor(nextPoint);
+							Color nC = uvc * (abs(surfaceNormal.dot(gRay))) * (1 - (closestObj->specular + closestObj->transparency));
+							diffuse.r = (diffuse.r + nC.r) / 2;
+							diffuse.g = (diffuse.g + nC.g) / 2;
+							diffuse.b = (diffuse.b + nC.b) / 2;
+						}
+						else {
+							Color nC = tex.getColor(nextPoint) * (abs(surfaceNormal.dot(gRay))) * (1 - (closestObj->specular + closestObj->transparency));
+							diffuse.r = (diffuse.r + nC.r) / 2;
+							diffuse.g = (diffuse.g + nC.g) / 2;
+							diffuse.b = (diffuse.b + nC.b) / 2;
+						}
+					}
+					else {
+						Color nC = cir->color * (abs(surfaceNormal.dot(gRay))) * (1 - (closestObj->specular + closestObj->transparency));
+						diffuse.r = (diffuse.r + nC.r) / 2;
+						diffuse.g = (diffuse.g + nC.g) / 2;
+						diffuse.b = (diffuse.b + nC.b) / 2;
+					}
+					diffuse = diffPrev * (1.0 - 1.0 / gDist) + diffuse * (1.0 / gDist);
+				}
+				else if (Triangle * t = dynamic_cast<Triangle*>(g)) {
+					// todo get the point on the circle closest to the nextPoint	
+					
+					Point closestPoint = t->getClosest(nextPoint);
+					Point gRay = (closestPoint - nextPoint).norm();
+					float gDist = (closestPoint - nextPoint).magnitude();
+
+					if (gDist < 1) {
+						gDist = 1;
+					}
+
+					// todo which is less expensive checking the light intersection or checking the shadow?	
+					Color diffPrev = diffuse;
+					Color nC = t->color * (abs(surfaceNormal.dot(gRay))) * (1 - (closestObj->specular + closestObj->transparency));
+					diffuse.r = (diffuse.r + nC.r) / 2;
+					diffuse.g = (diffuse.g + nC.g) / 2;
+					diffuse.b = (diffuse.b + nC.b) / 2;
+
+					diffuse = diffPrev * (1.0 - 1.0 / gDist) + diffuse * (1.0 / gDist);
+				}
+				
+				
 			}
 		}
 
@@ -324,7 +388,7 @@ void stereogram() {
 		{
 			for (int k = 0; k < DIM; ++k)
 			{
-				parallel_for(0, DIM, [&](size_t l)
+				for (int l = 0; l < DIM; ++l)
 					{
 						// todo consider moving the random to a random point on the found triangle
 						// normalize to be a scale of 0 to 1
@@ -344,7 +408,7 @@ void stereogram() {
 						Color previous = cList[k][l];
 						Color current = Color(r * .1, g * .1, b * .1);
 						cList[k][l] = current;
-					});
+					}
 			}
 			PPMMaker().writeBlock(cList, i, j);
 		}

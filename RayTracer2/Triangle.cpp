@@ -134,4 +134,19 @@ public:
 		setup();
 		return *this;
 	}
+
+	Point getClosest(Point& p) {
+		float d1 = (p - p1).magnitude();
+		float d2 = (p - p2).magnitude();
+		float d3 = (p - p3).magnitude();
+		if (d1 > d2 && d1 > d3) {
+			return p1;
+		}
+		else if (d1 > d3) {
+			return p2;
+		}
+		else {
+			return p3;
+		}
+	}
 };
